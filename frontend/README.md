@@ -1,6 +1,7 @@
-# Getting Started with Create React App
+## Run this line for CSS to compile (hot-reload) !!!!
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+`npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css --watch`
+If you do not run this, CSS styles will NOT be applied.
 
 ## Available Scripts
 
