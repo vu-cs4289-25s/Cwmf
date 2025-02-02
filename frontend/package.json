@@ -9,12 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@instantdb/react": "^0.17.12",
     "next": "^15.1.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/node": "22.13.0",
+    "@types/react": "19.0.8",
     "eslint": "^9",
     "eslint-config-next": "15.1.6",
     "postcss": "^8",
