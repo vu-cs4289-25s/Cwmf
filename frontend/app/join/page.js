@@ -1,4 +1,51 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+
 export default function AccountPage() {
+    const router = useRouter()
+    const [formData, setFormData] = useState({
+        username: '',
+        code: ''
+    })
+    const [error, setError] = useState('')
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }))
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        setError('')
+
+        try {
+            // ## TODO ## send player to backend; add to game lobby
+
+            // const response = await fetch('/api/verify-code', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify(formData)
+            // })
+
+            // if (!response.ok) {
+            //     const data = await response.json()
+            //     throw new Error(data.message || 'Verification failed')
+            // }
+
+            // const data = await response.json()
+
+            router.push(`/game/${formData.code}/lobby`)
+        } catch (err) {
+            setError(err.message)
+        }
+    }
 
     return (
         <>
@@ -8,7 +55,13 @@ export default function AccountPage() {
                 </div>
 
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form action="#" method="POST" className="space-y-6">
+                    {error && (
+                        <div className="mb-4 p-3 text-sm text-red-500 bg-red-100 rounded-md">
+                            {error}
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
                             <label htmlFor="username" className="block text-sm/6 font-medium text-gray-900">
                                 Username
@@ -17,8 +70,10 @@ export default function AccountPage() {
                                 <input
                                     id="username"
                                     name="username"
-                                    type="username"
+                                    type="text"
                                     required
+                                    value={formData.username}
+                                    onChange={handleInputChange}
                                     autoComplete="username"
                                     className="block w-full rounded-md bg-gray-200 px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                                 />
@@ -35,9 +90,10 @@ export default function AccountPage() {
                                 <input
                                     id="code"
                                     name="code"
-                                    type="code"
+                                    type="text"
                                     required
-                                    autoComplete="current-password"
+                                    value={formData.code}
+                                    onChange={handleInputChange}
                                     className="block w-full rounded-md bg-gray-200 px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                                 />
                             </div>
