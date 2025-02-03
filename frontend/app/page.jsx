@@ -9,29 +9,6 @@ const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
 const db = init({ appId: APP_ID });
 
 function LandingPage() {
-
-  const query = {
-    goalers: {
-      $: {
-        where: {
-          title: 'eat',
-        },
-      },
-    },
-  };
-  const { isLoading, error, data } = db.useQuery(query);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-  const { goalers } = data;
-
-  console.log(goalers);
-
-  function createGoal() {
-    db.transact(db.tx.goalers[id()].update({ title: 'peepee' }));
-
-  }
   function createGame(gameCode, userName) {
     db.transact(db.tx.games[id()].create({
       gameCode,
@@ -93,7 +70,6 @@ function LandingPage() {
             <button
               type="button"
               className="w-full rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 h-12 w-md"
-              onClick={createGoal}
             >
               Create Game
             </button>
