@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { id, i, init, InstaQLEntity } from "@instantdb/react";
+import { useRouter } from 'next/navigation';
 
 // ID for app: cwmf
 const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
@@ -9,12 +10,20 @@ const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
 const db = init({ appId: APP_ID });
 
 function LandingPage() {
+  const router = useRouter();
+
   function createGame(gameCode, userName) {
-    db.transact(db.tx.games[id()].create({
-      gameCode,
-      status: 'waiting',
-      players: [userName],
-    }));
+    try {
+      db.transact(db.tx.games[id()].create({
+        gameCode,
+        status: 'waiting',
+        players: [userName],
+      }));
+      // Navigate to the game page
+      router.push(`/game/${gameCode}`);
+    } catch (error) {
+      console.error('Error creating game:', error);
+    }
   }
 
   function joinGame(gameCode, userName) {
@@ -70,6 +79,7 @@ function LandingPage() {
             <button
               type="button"
               className="w-full rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 h-12 w-md"
+              onClick={() => createGame(Math.floor(Math.random() * 900000 + 100000).toString(), "Player")}
             >
               Create Game
             </button>
