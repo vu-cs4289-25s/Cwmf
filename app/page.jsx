@@ -27,33 +27,6 @@ function LandingPage() {
     }
   }
 
-  function joinGame(gameCode, userName) {
-    console.log('Joining game:', gameCode, userName);
-    const query = {
-      games: {
-        $: {
-          where: { gameCode },
-        },
-      },
-    };
-
-    try {
-    const { isLoading, error, data } = db.useQuery(query);
-    if (isLoading) {
-      console.log('Loading...');
-      return;
-    }
-
-    console.log(data)
-
-    db.transact(db.tx.games[data.games[0].id].update({
-      players: [...data.games[0].players, userName],
-    }));
-  } catch (error) {
-    console.error('Error joining game:', error);
-  }
-  }
-
   function deleteGoals() {
     db.transact(goalers.map((g) => db.tx.goalers[g.id].delete()));
   }

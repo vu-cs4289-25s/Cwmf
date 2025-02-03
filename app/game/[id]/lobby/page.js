@@ -1,6 +1,24 @@
 //Lobby
 import Link from "next/link";
+import { init } from "@instantdb/react";
+const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
 
+const db = init({ appId: APP_ID });
+
+async function getGameData(gameCode) {
+    const query = {
+        games: {
+            $: {
+                where: { gameCode: gameCode },
+            },
+        },
+    };
+    const { isLoading, error, data } = await db.queryOnce(query);
+    if (isLoading) {
+        return { error: 'Loading...' };
+    }
+    return data.games[0];
+}
 export default function LobbyPage() {
     return (
         <>

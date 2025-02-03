@@ -2,6 +2,38 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { id, i, init, InstaQLEntity } from "@instantdb/react";
+
+const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
+
+const db = init({ appId: APP_ID });
+
+async function joinGame(gameCode, userName) {
+    console.log('Joining game:', gameCode, userName);
+    const query = {
+      games: {
+        $: {
+          where: { gameCode: gameCode },
+        },
+      },
+    };
+
+    try {
+    const { isLoading, error, data } = await db.queryOnce(query);
+    if (isLoading) {
+      console.log('Loading...');
+      return;
+    }
+
+    console.log(data)
+
+    db.transact(db.tx.games[data.games[0].id].update({
+      players: [...data.games[0].players, userName],
+    }));
+  } catch (error) {
+    console.error('Error joining game:', error);
+  }
+  }
 
 export default function AccountPage() {
     const router = useRouter()
@@ -103,6 +135,7 @@ export default function AccountPage() {
                             <button
                                 type="submit"
                                 className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                onClick={() => joinGame(formData.code, formData.username)}
                             >
                                 Submit
                             </button>
