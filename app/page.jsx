@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { id, i, init, InstaQLEntity } from "@instantdb/react";
 import { useRouter } from 'next/navigation';
+import { join } from "path";
 
 // ID for app: cwmf
 const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
@@ -14,19 +15,20 @@ function LandingPage() {
 
   function createGame(gameCode, userName) {
     try {
-      db.transact(db.tx.games[id()].create({
+      db.transact(db.tx.games[id()].update({
         gameCode,
         status: 'waiting',
         players: [userName],
       }));
       // Navigate to the game page
-      router.push(`/game/${gameCode}`);
+      //router.push(`/game/${gameCode}`);
     } catch (error) {
       console.error('Error creating game:', error);
     }
   }
 
   function joinGame(gameCode, userName) {
+    console.log('Joining game:', gameCode, userName);
     const query = {
       games: {
         $: {
@@ -34,11 +36,22 @@ function LandingPage() {
         },
       },
     };
+
+    try {
     const { isLoading, error, data } = db.useQuery(query);
+    if (isLoading) {
+      console.log('Loading...');
+      return;
+    }
+
+    console.log(data)
 
     db.transact(db.tx.games[data.games[0].id].update({
       players: [...data.games[0].players, userName],
     }));
+  } catch (error) {
+    console.error('Error joining game:', error);
+  }
   }
 
   function deleteGoals() {
@@ -80,6 +93,7 @@ function LandingPage() {
               type="button"
               className="w-full rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 h-12 w-md"
               onClick={() => createGame(Math.floor(Math.random() * 900000 + 100000).toString(), "Player")}
+              //onClick={() => joinGame("141135", "Player2")}
             >
               Create Game
             </button>
