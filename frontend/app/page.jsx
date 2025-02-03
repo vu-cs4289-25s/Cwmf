@@ -32,6 +32,28 @@ function LandingPage() {
     db.transact(db.tx.goalers[id()].update({ title: 'peepee' }));
 
   }
+  function createGame(gameCode, userName) {
+    db.transact(db.tx.games[id()].create({
+      gameCode,
+      status: 'waiting',
+      players: [userName],
+    }));
+  }
+
+  function joinGame(gameCode, userName) {
+    const query = {
+      games: {
+        $: {
+          where: { gameCode },
+        },
+      },
+    };
+    const { isLoading, error, data } = db.useQuery(query);
+
+    db.transact(db.tx.games[data.games[0].id].update({
+      players: [...data.games[0].players, userName],
+    }));
+  }
 
   function deleteGoals() {
     db.transact(goalers.map((g) => db.tx.goalers[g.id].delete()));
