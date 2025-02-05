@@ -48,6 +48,7 @@ export default function PlayPage({ params }) {
         break;
       case "VOTING":
         setStage("RESULTS");
+        setTimeLeft(5); // Set results time?
         break;
       case "RESULTS":
         // Move to next round or end game
@@ -75,6 +76,7 @@ export default function PlayPage({ params }) {
       timeLeft,
       theme: "Things a pirate would say",
       prompt: "BBL",
+      users: [],
     };
 
     switch (stage) {
