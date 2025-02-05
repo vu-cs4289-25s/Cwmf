@@ -1,22 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 export default function GamePage(props) {
-  const [timeLeft, setTimeLeft] = useState(30);
   const [answer, setAnswer] = useState("");
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 0) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -27,19 +12,20 @@ export default function GamePage(props) {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle submission logic here
-    console.log("Submitted answer:", answer);
-    setAnswer("");
     props.handleSubmit(answer);
+    setAnswer("");
   };
 
   return (
     <div className="flex min-h-screen flex-col">
       <div className="text-center pt-8 pb-0">
-        <h1 className="text-center text-4xl py-5">Round 5</h1>
-        <h3 className="text-2xl">Theme: Things a pirate would say</h3>
+        <h1 className="text-center text-4xl py-5">
+          Round {props.currentRound}
+        </h1>
+        <h3 className="text-2xl">Theme: {props.theme}</h3>
       </div>
       <div className="text-center pt-30 pb-0">
-        <h1 className="text-center text-8xl py-5">BBL</h1>
+        <h1 className="text-center text-8xl py-5">{props.prompt}</h1>
       </div>
 
       {/* Fixed bottom section with input and timer */}
@@ -66,7 +52,7 @@ export default function GamePage(props) {
 
         {/* Timer */}
         <div className="max-w-md mx-auto flex flex-col items-center p-4">
-          <div className="text-6xl font-bold">{formatTime(timeLeft)}</div>
+          <div className="text-6xl font-bold">{formatTime(props.timeLeft)}</div>
         </div>
       </div>
     </div>

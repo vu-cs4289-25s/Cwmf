@@ -14,7 +14,11 @@ export default function PlayPage({ params }) {
   const [stage, setStage] = useState("PREP");
   const [currentRound, setCurrentRound] = useState(5);
   const [timeLeft, setTimeLeft] = useState(5);
-  const [answers, setAnswers] = useState([]);
+  const [answers, setAnswers] = useState([
+    "bbl",
+    "big booty lover",
+    "bur bro ll",
+  ]);
 
   // Timer logic can be shared across stages
   useEffect(() => {
@@ -38,9 +42,6 @@ export default function PlayPage({ params }) {
         setStage("GAME");
         setTimeLeft(30); // Reset timer for game stage
         break;
-      case "GAME":
-        setStage("WAITING");
-        break;
       case "WAITING":
         setStage("VOTING");
         setTimeLeft(45); // Set voting time
@@ -63,6 +64,7 @@ export default function PlayPage({ params }) {
   };
 
   const handleSubmitAnswer = (answer) => {
+    console.log(answer);
     setAnswers((prev) => [...prev, answer]);
     setStage("WAITING");
   };
@@ -77,30 +79,26 @@ export default function PlayPage({ params }) {
 
     switch (stage) {
       case "PREP":
-        return <PrepStage {...commonProps} onTimeUp={() => setStage("GAME")} />;
+        return <PrepStage {...commonProps} />;
       case "GAME":
         return <GameStage {...commonProps} handleSubmit={handleSubmitAnswer} />;
       case "WAITING":
         return (
           <WaitingStage
             {...commonProps}
-            onProceed={() =>
+            onProceed={() => {
               // temporary, later this will happen after everyone submits
-              setStage("SHOW")
-            }
+              console.log("show!!");
+              setStage("VOTING");
+            }}
           />
         );
-      case "SHOW":
-        return <ShowSubmissionsStage {...commonProps} />;
       case "VOTING":
         return (
           <VotingStage
             {...commonProps}
             answers={answers}
-            onVote={(vote) => {
-              // Handle vote logic
-              setStage("RESULTS");
-            }}
+            handleVote={(vote) => console.log(vote)}
           />
         );
       case "RESULTS":
