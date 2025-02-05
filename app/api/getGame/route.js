@@ -1,8 +1,18 @@
-import { adminAPI } from "@instantdb/admin";
+import { init, id } from "@instantdb/admin";
 import { NextResponse } from 'next/server';
 
 const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
-const admin = adminAPI({ appId: APP_ID });
+const INSTANTDB_ADMIN_SECRET = process.env.INSTANTDB_ADMIN_SECRET;
+
+// Fail fast if admin secret is not configured
+if (!INSTANTDB_ADMIN_SECRET) {
+    throw new Error('INSTANTDB_ADMIN_SECRET environment variable is not configured');
+}
+
+const db = init({
+    appId: APP_ID,
+    adminToken: INSTANTDB_ADMIN_SECRET,
+});
 
 export async function GET(request) {
     try {
@@ -17,24 +27,30 @@ export async function GET(request) {
             );
         }
 
-        const query = {
-            games: {
-                $: {
-                    where: { gameCode: gameCode },
-                },
-            },
-        };
+        // Simplified query structure
+        const data = await db.query({ 
+            games: {} 
+        });
 
-        const data = await admin.query(query);
+        const { games } = data;
 
-        if (!data?.games?.[0]) {
+        if (!games?.[0]) {
             return NextResponse.json(
                 { error: 'Game not found' },
                 { status: 404 }
             );
         }
 
-        return NextResponse.json(data.games[0]);
+        // Find the game with matching gameCode
+        const game = games.find(g => g.gameCode === gameCode);
+        if (!game) {
+            return NextResponse.json(
+                { error: 'Game not found' },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json(game);
 
     } catch (error) {
         console.error('Error fetching game:', error);
