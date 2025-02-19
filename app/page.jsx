@@ -21,7 +21,7 @@ function LandingPage() {
         players: [userName],
       }));
       // Navigate to the game page
-      //router.push(`/game/${gameCode}`);
+      router.push(`/game/${gameCode}/create`);
     } catch (error) {
       console.error('Error creating game:', error);
     }
