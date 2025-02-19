@@ -4,17 +4,13 @@
 import Link from "next/link";
 import { init, Cursors } from "@instantdb/react";
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
 
 const db = init({ appId: APP_ID });
 
 const roomId = "default-room";
 const room = db.room("lobby", roomId);
-
-const randomId = Math.random().toString(36).slice(2, 6);
-const user = {
-  name: `User#${randomId}`,
-};
 
 async function getGameData(gameCode) {
   const query = {
@@ -24,21 +20,41 @@ async function getGameData(gameCode) {
       },
     },
   };
-  const { isLoading, error, data } = await db.queryOnce(query);
-  if (isLoading) {
-    return { error: "Loading..." };
-  }
+  const { data } = await db.queryOnce(query);
   return data.games[0];
 }
 
 export default function LobbyPage() {
-  const publishChat = db.rooms.usePublishTopic(room, "chat");
+  const { id } = useParams();
 
-  const [chats, setChats] = useState([]);
+  const [userData, setUserData] = useState(null);
+  const [gameData, setGameData] = useState(null);
 
-  db.rooms.useTopicEffect(room, "chat", (chat) => {
-    setChats((prevChats) => [...prevChats, chat.chat]);
+  const { data, isLoading, error } = db.useQuery({
+    games: {
+      $: {
+        where: { gameCode: id },
+      },
+    },
   });
+
+  useEffect(() => {
+    if (data?.games?.length > 0) {
+      setGameData(data.games[0]); // Save game state
+    }
+  }, [data]); // Runs whenever `data` updates
+
+  useEffect(() => {
+    const user = {
+      UUID: localStorage.getItem("UUID"),
+      name: localStorage.getItem("userName"),
+      host: localStorage.getItem("host"),
+      game: localStorage.getItem("game"),
+    };
+    setUserData(user);
+  }, []);
+
+  // Publish your presence to the room
 
   const {
     user: myPresence,
@@ -46,10 +62,33 @@ export default function LobbyPage() {
     publishPresence,
   } = db.rooms.usePresence(room);
 
-  // Publish your presence to the room
   useEffect(() => {
-    publishPresence({ name: user.name });
-  }, []);
+    if (userData) {
+      publishPresence({ name: userData.name });
+    }
+  }, [userData, publishPresence]);
+
+  useEffect(() => {
+    if (!gameData || !userData) return;
+
+    const removePlayer = () => {
+      let newPlayers =
+        gameData.players?.filter((player) => player.UUID !== userData.UUID) ||
+        [];
+
+      db.transact(db.tx.games[id].update({ players: newPlayers }));
+    };
+
+    window.addEventListener("beforeunload", removePlayer);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") removePlayer();
+    });
+
+    return () => {
+      window.removeEventListener("beforeunload", removePlayer);
+      document.removeEventListener("visibilitychange", removePlayer);
+    };
+  }, [gameData, userData]);
 
   if (!myPresence) {
     return <p>App loading...</p>;
@@ -61,7 +100,7 @@ export default function LobbyPage() {
     <>
       <div className="flex min-h-screen flex-col">
         <div className="text-center pt-8 pb-0">
-          <h3 className="text-2xl">Game Code: 1232321</h3>
+          <h3 className="text-2xl">Game Code: {id}</h3>
           <h1 className="text-center text-8xl py-5">CWMF</h1>
         </div>
 
@@ -83,10 +122,6 @@ export default function LobbyPage() {
                 <button
                   type="submit"
                   className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  onClick={() => {
-                    setChats((prevChats) => [...prevChats, "Start game"]);
-                    publishChat({ chat: "Start game" });
-                  }}
                 >
                   Edit
                 </button>
@@ -109,7 +144,7 @@ export default function LobbyPage() {
                   <div className="inline-flex items-center justify-center size-16 rounded-full ring-2 ring-white bg-gray-500 text-white">
                     <span className="text-lg font-medium">You</span>
                   </div>
-                  <span className="mt-2">{user.name}</span>
+                  <span className="mt-2">{userData.name}</span>
                 </div>
                 {Object.entries(peers).map(([peerId, peer]) => (
                   <span key={peerId}>
@@ -122,13 +157,6 @@ export default function LobbyPage() {
                   </span>
                 ))}
               </ul>
-              <div className="bg-gray-100 p-4 rounded-lg w-96">
-                {chats.map((chat, index) => (
-                  <p key={index} className="text-gray-800">
-                    {chat}
-                  </p>
-                ))}
-              </div>
             </div>
           </div>
         </div>
