@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 25, "column": 0}, "map": {"version":3,"sources":["file:///Users/EricSang/School/Web%20Dev/Cwmf/frontend/pages/_app.js"],"sourcesContent":["import { Root } from 'postcss'\nimport './globals.css'\nimport RootLayout from './layout'\n\nfunction MyApp({ Component, pageProps }) {\n    return (\n        <RootLayout>\n            <Component {...pageProps} />\n        </RootLayout>\n    )\n}\n\nexport default MyApp"],"names":[],"mappings":";;;;AAAA;;;;;;;;;;;;;;;;;;;AAIA,SAAS,MAAM,EAAE,SAAS,EAAE,SAAS,EAAE;IACnC,qBACI,qKAAC;kBACG,cAAA,qKAAC;YAAW,GAAG,SAAS;;;;;;;;;;;AAGpC;uCAEe"}},
-    {"offset": {"line": 64, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}}]
-}

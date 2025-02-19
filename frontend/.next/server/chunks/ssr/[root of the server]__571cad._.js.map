@@ -1,9 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 55, "column": 0}, "map": {"version":3,"sources":["file:///Users/EricSang/School/Web%20Dev/Cwmf/frontend/pages/_document.js"],"sourcesContent":["import { Html, Head, Main, NextScript } from 'next/document'\n\nexport default function Document() {\n    return (\n        <Html>\n            <Head />\n            <body>\n                <Main />\n                <NextScript />\n            </body>\n        </Html>\n    )\n}"],"names":[],"mappings":";;;;AAAA;;;AAEe,SAAS;IACpB,qBACI,qKAAC,yHAAA,CAAA,OAAI;;0BACD,qKAAC,yHAAA,CAAA,OAAI;;;;;0BACL,qKAAC;;kCACG,qKAAC,yHAAA,CAAA,OAAI;;;;;kCACL,qKAAC,yHAAA,CAAA,aAAU;;;;;;;;;;;;;;;;;AAI3B"}},
-    {"offset": {"line": 95, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}},
-    {"offset": {"line": 111, "column": 0}, "map": {"version":3,"sources":["file:///Users/EricSang/School/Web%20Dev/Cwmf/frontend/pages/_app.js"],"sourcesContent":["import { Root } from 'postcss'\nimport './globals.css'\nimport RootLayout from './layout'\n\nfunction MyApp({ Component, pageProps }) {\n    return (\n        <RootLayout>\n            <Component {...pageProps} />\n        </RootLayout>\n    )\n}\n\nexport default MyApp"],"names":[],"mappings":";;;;AAAA;;;;;;;;;;;;;;;;;;;AAIA,SAAS,MAAM,EAAE,SAAS,EAAE,SAAS,EAAE;IACnC,qBACI,qKAAC;kBACG,cAAA,qKAAC;YAAW,GAAG,SAAS;;;;;;;;;;;AAGpC;uCAEe"}},
-    {"offset": {"line": 150, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}}]
-}
