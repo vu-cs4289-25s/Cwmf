@@ -51,7 +51,7 @@ function LandingPage() {
         })
       );
       // Navigate to the game page
-      router.push(`/game/${gameCode}/lobby`);
+      router.push(`/game/${gameCode}/create`);
     } catch (error) {
       console.error("Error creating game:", error);
     }
