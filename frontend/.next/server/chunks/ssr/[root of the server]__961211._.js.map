@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 15, "column": 0}, "map": {"version":3,"sources":["file:///Users/EricSang/School/Web%20Dev/Cwmf/frontend/pages/_app.js"],"sourcesContent":["import './globals.css'\n\nfunction MyApp({ Component, pageProps }) {\n    return <Component {...pageProps} />\n}\n\nexport default MyApp"],"names":[],"mappings":";;;;;;AAEA,SAAS,MAAM,EAAE,SAAS,EAAE,SAAS,EAAE;IACnC,qBAAO,qKAAC;QAAW,GAAG,SAAS;;;;;;AACnC;uCAEe"}},
+    {"offset": {"line": 31, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}}]
+}

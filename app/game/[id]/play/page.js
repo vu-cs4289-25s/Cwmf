@@ -12,7 +12,7 @@ import ShowSubmissionsStage from "./stages/ShowSubmissionsStage";
 
 export default function PlayPage({ params }) {
   const [stage, setStage] = useState("PREP");
-  const [currentRound, setCurrentRound] = useState(5);
+  const [currentRound, setCurrentRound] = useState(1);
   const [timeLeft, setTimeLeft] = useState(5);
   const [answers, setAnswers] = useState([
     "bbl",
@@ -58,6 +58,7 @@ export default function PlayPage({ params }) {
   };
 
   const handleNextRound = () => {
+    // Make case for final round count reached
     setCurrentRound((prev) => prev + 1);
     setStage("PREP");
     setTimeLeft(30);
@@ -66,7 +67,9 @@ export default function PlayPage({ params }) {
 
   const handleSubmitAnswer = (answer) => {
     console.log(answer);
-    setAnswers((prev) => [...prev, answer]);
+    if (answer !== "") {
+      setAnswers((prev) => [...prev, answer]);
+    }
     setStage("WAITING");
   };
 
