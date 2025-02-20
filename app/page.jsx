@@ -1,3 +1,4 @@
+//app/page.jsx
 "use client";
 
 import Link from "next/link";
@@ -7,7 +8,7 @@ import { join } from "path";
 import { useEffect } from "react";
 
 // ID for app: cwmf
-const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
+const APP_ID = "7f057877-f350-4ab6-9568-2e4c235c37a2";
 
 const db = init({ appId: APP_ID });
 
