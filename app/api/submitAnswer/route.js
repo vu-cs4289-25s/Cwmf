@@ -1,4 +1,4 @@
-import { init,id } from '@instantdb/admin';
+import { init, id } from '@instantdb/admin';
 import { NextResponse } from 'next/server';
 
 const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
@@ -10,10 +10,10 @@ const db = init({
 export async function POST(request) {
     try {
         const body = await request.json();
-        const { gameId, playerId, answer } = body;
+        const { gameCode, playerId, answer } = body;
 
         // Validate required fields
-        if (!gameId || !playerId || !answer) {
+        if (!gameCode || !playerId || !answer) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
                 { status: 400 }
@@ -21,9 +21,27 @@ export async function POST(request) {
         }
         const roundId = id()
 
-        // Update the game with the new submission using correct InstantDB syntax
+        const query = {
+            games: {
+                $: {
+                    where: { gameCode: gameCode },
+                },
+            },
+        };
+
+        const data = await db.query(query);
+
+        if (!data?.games?.[0]) {
+            return NextResponse.json(
+                { error: 'Game not found' },
+                { status: 404 }
+            );
+        }
+        const gameId = data.games[0].id;
+
+        // Update the round and game using correct InstantDB syntax
         const res = await db.transact([
-            db.tx.round[roundId].update({ 
+            db.tx.round[roundId].update({
                 submissions: {
                     [playerId]: {
                         answer,
