@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import Alert from "../../../../components/Alert";
 
 export default function VotingStage(props) {
   const [vote, setVote] = useState("");
+  const [showAlert, setShowAlert] = useState(true);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -17,6 +19,16 @@ export default function VotingStage(props) {
 
   return (
     <div className="flex min-h-screen flex-col">
+      {/* Show alert only for players who didn't submit */}
+      {props.showNoSubmissionAlert && showAlert && (
+        <Alert
+          message="Time's Up!"
+          subtitle="You didn't submit an answer in time. Time to vote on other players' answers..."
+          duration={2000}
+          onDismiss={() => setShowAlert(false)}
+        />
+      )}
+
       <div className="text-center pt-8 pb-0">
         <h1 className="text-center text-4xl py-5">
           Round {props.currentRound}
@@ -29,21 +41,17 @@ export default function VotingStage(props) {
       <div className="flex flex-col mt-10 space-y-5 items-center justify-center">
         {props.answers.map((answer, index) => (
           <button
-            onClick={() => {
-              setVote(answer);
-            }}
+            onClick={() => setVote(answer)}
             key={index}
-            className={`${answer === vote ? "bg-blue-400" : "bg-gray-300"
-              } w-3/4 rounded-md p-3`}
+            className={`${answer === vote ? "bg-blue-400" : "bg-gray-300"} w-3/4 rounded-md p-3`}
           >
             <p className="text-2xl">{answer}</p>
           </button>
         ))}
       </div>
 
-      {/* Fixed bottom section with input and timer */}
+      {/* Fixed bottom section with timer */}
       <div className="fixed bottom-0 left-0 right-0 bg-gray-100">
-        {/* Timer */}
         <div className="max-w-md mx-auto flex flex-col items-center p-4">
           <div className="text-6xl font-bold">{formatTime(props.timeLeft)}</div>
         </div>

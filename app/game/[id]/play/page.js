@@ -14,7 +14,7 @@ const db = init({ appId: APP_ID });
 
 export default function PlayPage() {
   const params = useParams();
-  const [answers, setAnswers] = useState([]);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [localTimeLeft, setLocalTimeLeft] = useState(null);
 
   // Subscribe to game state
@@ -58,6 +58,13 @@ export default function PlayPage() {
     return () => clearInterval(interval);
   }, [game?.timerStart, game?.timeLeft, game?.isTimerRunning]);
 
+  // Reset submission state when entering game stage
+  useEffect(() => {
+    if (game?.currentStage === "GAME") {
+      setHasSubmitted(false);
+    }
+  }, [game?.currentStage]);
+
   const handleStageComplete = async () => {
     if (!game) return;
 
@@ -76,8 +83,7 @@ export default function PlayPage() {
   const getNextStage = (currentStage) => {
     const stages = {
       "PREP": "GAME",
-      "GAME": "WAITING",
-      "WAITING": "VOTING",
+      "GAME": "VOTING", // Everyone goes to voting when time expires
       "VOTING": "RESULTS",
       "RESULTS": "PREP"
     };
@@ -86,24 +92,25 @@ export default function PlayPage() {
 
   const getStageDuration = (stageName) => {
     const durations = {
-      "PREP": 5,
-      "GAME": 30,
-      "WAITING": 10,
-      "VOTING": 45,
-      "RESULTS": 5
+      "PREP": 5,     // 5 seconds to prepare
+      "GAME": 30,    // 30 seconds to enter answer
+      "VOTING": 15,  // 15 seconds to vote
+      "RESULTS": 10  // 10 seconds to show results
     };
     return durations[stageName] || 30;
   };
 
-  const handleSubmitAnswer = (answer) => {
+  const handleSubmitAnswer = async (answer) => {
+    if (!game) return;
+
     if (answer !== "") {
       // Store answer in the database
       const updatedAnswers = [...(game.answers || []), answer];
-      db.transact(db.tx.games[game.id].update({
-        answers: updatedAnswers
+      await db.transact(db.tx.games[game.id].update({
+        answers: updatedAnswers,
+        submittedPlayers: [...(game.submittedPlayers || []), "currentPlayerId"] // Store who submitted
       }));
-      setAnswers(updatedAnswers);
-      handleStageComplete();
+      setHasSubmitted(true);
     }
   };
 
@@ -118,18 +125,23 @@ export default function PlayPage() {
       users: game.players || [],
     };
 
+    // Show waiting stage only for players who submitted during game stage
+    if (game.currentStage === "GAME" && hasSubmitted) {
+      return <WaitingStage {...commonProps} />;
+    }
+
+    // Handle other stages
     switch (game.currentStage) {
       case "PREP":
         return <PrepStage {...commonProps} />;
       case "GAME":
         return <GameStage {...commonProps} handleSubmit={handleSubmitAnswer} />;
-      case "WAITING":
-        return <WaitingStage {...commonProps} onProceed={handleStageComplete} />;
       case "VOTING":
         return (
           <VotingStage
             {...commonProps}
             answers={game.answers || []}
+            showNoSubmissionAlert={!hasSubmitted} // Show alert only for players who didn't submit
             handleVote={(vote) => {
               console.log(vote);
               handleStageComplete();
