@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Alert from "../../../../components/Alert";
 
 export default function GamePage(props) {
   const [answer, setAnswer] = useState("");
@@ -11,13 +12,15 @@ export default function GamePage(props) {
   };
 
   useEffect(() => {
+    // FIXME: IMMEDIATELY SHOWS ALERT BECAUSE PREVIOUS SCREEN HITS 0 then RESETS. MAKE IT ONLY FOR THIS SCREEN
     if (props.timeLeft === 0 && !answer) {
-      setShowAlert(true);
+      // setShowAlert(true);
       // Auto-submit empty answer after 2 seconds
-      const timeout = setTimeout(() => {
+      const submitTimeout = setTimeout(() => {
         props.handleSubmit("");
       }, 2000);
-      return () => clearTimeout(timeout);
+
+      return () => clearTimeout(submitTimeout);
     }
   }, [props.timeLeft, answer]);
 
@@ -31,16 +34,12 @@ export default function GamePage(props) {
     <div className="flex min-h-screen flex-col">
       {/* Alert */}
       {showAlert && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg max-w-md mx-4">
-            <div className="flex items-center">
-              <div className="text-lg font-bold">Time's Up!</div>
-            </div>
-            <div className="mt-2">
-              You didn't submit an answer in time. Moving to the next stage...
-            </div>
-          </div>
-        </div>
+        <Alert
+          message="Time's Up!"
+          subtitle="You didn't submit an answer in time. Moving to the next stage..."
+          duration={2000}
+          onDismiss={() => setShowAlert(false)}
+        />
       )}
 
       <div className="text-center pt-8 pb-0">
@@ -50,18 +49,31 @@ export default function GamePage(props) {
         <h3 className="text-2xl">Theme: {props.theme}</h3>
       </div>
       <div className="text-center pt-30 pb-0">
-        <h1 className="text-center text-8xl py-5">{props.prompt}</h1>
+        <h1 className="text-center text-8xl py-5">{submittedAnswer}</h1>
       </div>
+
+      {/* Show submitted answer if it exists */}
+      {submittedAnswer && (
+        <div className="text-center mt-8">
+          <h2 className="text-2xl">Your answer:</h2>
+          <p className="text-4xl mt-2">{submittedAnswer}</p>
+        </div>
+      )}
 
       {/* Fixed bottom section with input and timer */}
       <div className="fixed bottom-0 left-0 right-0 bg-gray-100">
-        {/* Answer submission form */}
+        {/* Answer input section */}
         <div className="max-w-md mx-auto p-4">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2">
             <input
               type="text"
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !submittedAnswer) {
+                  handleSubmit();
+                }
+              }}
               placeholder="Type your answer..."
               className="w-full px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
               autoComplete="off"
@@ -74,7 +86,7 @@ export default function GamePage(props) {
             >
               Submit
             </button>
-          </form>
+          </div>
         </div>
 
         {/* Timer */}

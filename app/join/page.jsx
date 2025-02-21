@@ -1,3 +1,4 @@
+//join/page.jsx
 "use client";
 
 import { useState } from "react";
