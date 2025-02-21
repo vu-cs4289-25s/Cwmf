@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { id, i, init, InstaQLEntity } from "@instantdb/react";
 
-const APP_ID = "7f057877-f350-4ab6-9568-2e4c235c37a2";
+const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
 
 const db = init({ appId: APP_ID });
 
@@ -72,7 +72,15 @@ export default function AccountPage() {
     };
 
     const { data } = await db.queryOnce(query);
+    console.log("Database response:", data);
+    
+    if (!data.games || data.games.length === 0) {
+      setError("Game not found");
+      return;
+    }
+
     const game = data.games[0];
+    console.log("Game data:", game);
 
     for (let player of game.players) {
       if (player.name === userName) {
