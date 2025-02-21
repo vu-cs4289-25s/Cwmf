@@ -14,7 +14,7 @@ const db = init({ appId: APP_ID });
 
 export default function PlayPage() {
   const params = useParams();
-  const [answers, setAnswers] = useState([]);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [localTimeLeft, setLocalTimeLeft] = useState(null);
 
   // Subscribe to game state
@@ -58,6 +58,13 @@ export default function PlayPage() {
     return () => clearInterval(interval);
   }, [game?.timerStart, game?.timeLeft, game?.isTimerRunning]);
 
+  // Reset submission state when entering game stage
+  useEffect(() => {
+    if (game?.currentStage === "GAME") {
+      setHasSubmitted(false);
+    }
+  }, [game?.currentStage]);
+
   const handleStageComplete = async () => {
     if (!game) return;
 
@@ -76,8 +83,7 @@ export default function PlayPage() {
   const getNextStage = (currentStage) => {
     const stages = {
       "PREP": "GAME",
-      "GAME": "WAITING",
-      "WAITING": "VOTING",
+      "GAME": "VOTING", // Everyone goes to voting when time expires
       "VOTING": "RESULTS",
       "RESULTS": "PREP"
     };
@@ -86,24 +92,30 @@ export default function PlayPage() {
 
   const getStageDuration = (stageName) => {
     const durations = {
-      "PREP": 5,
-      "GAME": 30,
-      "WAITING": 10,
-      "VOTING": 45,
-      "RESULTS": 5
+      "PREP": 5,     // 5 seconds to prepare
+      "GAME": 30,    // 30 seconds to enter answer
+      "VOTING": 15,  // 15 seconds to vote
+      "RESULTS": 10  // 10 seconds to show results
     };
     return durations[stageName] || 30;
   };
 
-  const handleSubmitAnswer = (answer) => {
-    if (answer !== "") {
-      // Store answer in the database
-      const updatedAnswers = [...(game.answers || []), answer];
-      db.transact(db.tx.games[game.id].update({
-        answers: updatedAnswers
-      }));
-      setAnswers(updatedAnswers);
-      handleStageComplete();
+  const handleSubmitAnswer = async (answer) => {
+    if (!game) return;
+
+    // Only consider it a submission if it came from a user action (not an auto-timeout)
+    // answer will be null for initial state, empty string for timeout
+    if (answer !== null) {
+      setHasSubmitted(true);
+
+      if (answer.trim() !== "") {
+        // Only store non-empty answers in the database
+        const updatedAnswers = [...(game.answers || []), answer];
+        await db.transact(db.tx.games[game.id].update({
+          answers: updatedAnswers,
+          submittedPlayers: [...(game.submittedPlayers || []), "currentPlayerId"]
+        }));
+      }
     }
   };
 
@@ -118,18 +130,23 @@ export default function PlayPage() {
       users: game.players || [],
     };
 
+    // Show waiting stage only for players who submitted during game stage
+    if (game.currentStage === "GAME" && hasSubmitted) {
+      return <WaitingStage {...commonProps} />;
+    }
+
+    // Handle other stages
     switch (game.currentStage) {
       case "PREP":
         return <PrepStage {...commonProps} />;
       case "GAME":
-        return <GameStage {...commonProps} handleSubmit={handleSubmit} />;
-      case "WAITING":
-        return <WaitingStage {...commonProps} onProceed={handleStageComplete} />;
+        return <GameStage {...commonProps} handleSubmit={handleSubmitAnswer} />;
       case "VOTING":
         return (
           <VotingStage
             {...commonProps}
             answers={game.answers || []}
+            showNoSubmissionAlert={!hasSubmitted} // Show alert only for players who didn't submit
             handleVote={(vote) => {
               console.log(vote);
               handleStageComplete();
@@ -149,46 +166,5 @@ export default function PlayPage() {
     }
   };
 
-  const renderSubmissionForm = () => {
-    return (
-      <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-8">
-        <input
-          type="text"
-          value={playerAnswer}
-          onChange={(e) => setPlayerAnswer(e.target.value)}
-          className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          placeholder="Enter your answer..."
-        />
-        <button
-          type="submit"
-          className="mt-4 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
-        >
-          Submit
-        </button>
-      </form>
-    );
-  };
-
-  if (isLoading) {
-    return <div>Loading game data...</div>;
-  }
-
-  if (error) {
-    return <div>Error loading game: {error.message}</div>;
-  }
-
-  if (!gameData) {
-    return <div>Game not found</div>;
-  }
-
-  return (
-    <div className="min-h-screen">
-      {/* Add game code display */}
-      <div className="absolute top-4 right-4 bg-gray-100 rounded-lg px-4 py-2">
-        Game Code: <span className="font-bold">{id}</span>
-      </div>
-      {renderStage()}
-      {renderSubmissionForm()}
-    </div>
-  );
+  return <div className="min-h-screen">{renderStage()}</div>;
 }

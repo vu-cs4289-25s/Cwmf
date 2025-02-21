@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
-import Alert from "../../../../components/Alert";
 
 export default function GamePage(props) {
   const [answer, setAnswer] = useState("");
-  const [showAlert, setShowAlert] = useState(false);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -11,18 +9,12 @@ export default function GamePage(props) {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  // Handle timer reaching zero - move directly to voting if no submission
   useEffect(() => {
-    // FIXME: IMMEDIATELY SHOWS ALERT BECAUSE PREVIOUS SCREEN HITS 0 then RESETS. MAKE IT ONLY FOR THIS SCREEN
     if (props.timeLeft === 0 && !answer) {
-      // setShowAlert(true);
-      // Auto-submit empty answer after 2 seconds
-      const submitTimeout = setTimeout(() => {
-        props.handleSubmit("");
-      }, 2000);
-
-      return () => clearTimeout(submitTimeout);
+      props.handleSubmit(""); // Empty submission
     }
-  }, [props.timeLeft, answer]);
+  }, [props.timeLeft, answer, props.handleSubmit]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -32,16 +24,6 @@ export default function GamePage(props) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Alert */}
-      {showAlert && (
-        <Alert
-          message="Time's Up!"
-          subtitle="You didn't submit an answer in time. Moving to the next stage..."
-          duration={2000}
-          onDismiss={() => setShowAlert(false)}
-        />
-      )}
-
       <div className="text-center pt-8 pb-0">
         <h1 className="text-center text-4xl py-5">
           Round {props.currentRound}
@@ -75,14 +57,12 @@ export default function GamePage(props) {
                 }
               }}
               placeholder="Type your answer..."
-              className="w-full px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
+              className="w-full px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               autoComplete="off"
-              disabled={showAlert}
             />
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-              disabled={showAlert}
+              className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors"
             >
               Submit
             </button>
