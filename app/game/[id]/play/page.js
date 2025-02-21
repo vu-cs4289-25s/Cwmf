@@ -1,7 +1,7 @@
 // app/game/[id]/play/page.js
 "use client";
 import { useState, useEffect } from "react";
-import { useParams } from 'next/navigation';
+import { useParams } from "next/navigation";
 import { init } from "@instantdb/react";
 import PrepStage from "./stages/PrepStage";
 import GameStage from "./stages/GameStage";
@@ -71,13 +71,18 @@ export default function PlayPage() {
     const nextStage = getNextStage(game.currentStage);
     const nextDuration = getStageDuration(nextStage);
 
-    await db.transact(db.tx.games[game.id].update({
-      currentStage: nextStage,
-      timerStart: Date.now(),
-      timeLeft: nextDuration,
-      isTimerRunning: true,
-      currentRound: nextStage === "PREP" ? (game.currentRound || 1) + 1 : (game.currentRound || 1)
-    }));
+    await db.transact(
+      db.tx.games[game.id].update({
+        currentStage: nextStage,
+        timerStart: Date.now(),
+        timeLeft: nextDuration,
+        isTimerRunning: true,
+        currentRound:
+          nextStage === "PREP"
+            ? (game.currentRound || 1) + 1
+            : game.currentRound || 1,
+      })
+    );
   };
 
   const getNextStage = (currentStage) => {

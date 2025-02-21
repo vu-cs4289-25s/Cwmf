@@ -28,7 +28,7 @@ export default function LobbyPage() {
   const room = db.room(`lobby-${id}`, id);
 
   const [userData, setUserData] = useState(null);
-  const [gameData, setGameData] = useState(null);
+  const [gameData, setGameData] = useState({});
 
   const { data, isLoading, error } = db.useQuery({
     games: {
@@ -160,16 +160,18 @@ export default function LobbyPage() {
         <div className="flex flex-col items-center gap-8">
           <div className="flex flex-wrap gap-8 justify-center max-w-md">
             <ul>
-              {Object.entries(gameData?.players).map(([playerId, player]) => (
-                <span key={playerId}>
-                  <div className="flex flex-col items-center">
-                    <div className="inline-flex items-center justify-center size-16 rounded-full ring-2 ring-white bg-gray-500 text-white">
-                      <span className="text-lg font-medium">BJ</span>
+              {gameData?.players &&
+                typeof gameData.players === "object" &&
+                Object.entries(gameData?.players).map(([playerId, player]) => (
+                  <span key={playerId}>
+                    <div className="flex flex-col items-center">
+                      <div className="inline-flex items-center justify-center size-16 rounded-full ring-2 ring-white bg-gray-500 text-white">
+                        <span className="text-lg font-medium">BJ</span>
+                      </div>
+                      <span className="mt-2">{player.name}</span>
                     </div>
-                    <span className="mt-2">{player.name}</span>
-                  </div>
-                </span>
-              ))}
+                  </span>
+                ))}
             </ul>
           </div>
         </div>
