@@ -1,7 +1,7 @@
 // app/game/[id]/play/page.js
 "use client";
 import { useState, useEffect } from "react";
-import { useParams } from 'next/navigation';
+import { useParams } from "next/navigation";
 import { init } from "@instantdb/react";
 import PrepStage from "./stages/PrepStage";
 import GameStage from "./stages/GameStage";
@@ -64,33 +64,38 @@ export default function PlayPage() {
     const nextStage = getNextStage(game.currentStage);
     const nextDuration = getStageDuration(nextStage);
 
-    await db.transact(db.tx.games[game.id].update({
-      currentStage: nextStage,
-      timerStart: Date.now(),
-      timeLeft: nextDuration,
-      isTimerRunning: true,
-      currentRound: nextStage === "PREP" ? (game.currentRound || 1) + 1 : (game.currentRound || 1)
-    }));
+    await db.transact(
+      db.tx.games[game.id].update({
+        currentStage: nextStage,
+        timerStart: Date.now(),
+        timeLeft: nextDuration,
+        isTimerRunning: true,
+        currentRound:
+          nextStage === "PREP"
+            ? (game.currentRound || 1) + 1
+            : game.currentRound || 1,
+      })
+    );
   };
 
   const getNextStage = (currentStage) => {
     const stages = {
-      "PREP": "GAME",
-      "GAME": "WAITING",
-      "WAITING": "VOTING",
-      "VOTING": "RESULTS",
-      "RESULTS": "PREP"
+      PREP: "GAME",
+      GAME: "WAITING",
+      WAITING: "VOTING",
+      VOTING: "RESULTS",
+      RESULTS: "PREP",
     };
     return stages[currentStage] || "PREP";
   };
 
   const getStageDuration = (stageName) => {
     const durations = {
-      "PREP": 5,
-      "GAME": 30,
-      "WAITING": 10,
-      "VOTING": 45,
-      "RESULTS": 5
+      PREP: 5,
+      GAME: 30,
+      WAITING: 10,
+      VOTING: 45,
+      RESULTS: 5,
     };
     return durations[stageName] || 30;
   };
@@ -99,9 +104,11 @@ export default function PlayPage() {
     if (answer !== "") {
       // Store answer in the database
       const updatedAnswers = [...(game.answers || []), answer];
-      db.transact(db.tx.games[game.id].update({
-        answers: updatedAnswers
-      }));
+      db.transact(
+        db.tx.games[game.id].update({
+          answers: updatedAnswers,
+        })
+      );
       setAnswers(updatedAnswers);
       handleStageComplete();
     }
@@ -124,7 +131,9 @@ export default function PlayPage() {
       case "GAME":
         return <GameStage {...commonProps} handleSubmit={handleSubmit} />;
       case "WAITING":
-        return <WaitingStage {...commonProps} onProceed={handleStageComplete} />;
+        return (
+          <WaitingStage {...commonProps} onProceed={handleStageComplete} />
+        );
       case "VOTING":
         return (
           <VotingStage
