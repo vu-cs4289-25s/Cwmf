@@ -122,7 +122,7 @@ export default function PlayPage() {
       case "PREP":
         return <PrepStage {...commonProps} />;
       case "GAME":
-        return <GameStage {...commonProps} handleSubmit={handleSubmitAnswer} />;
+        return <GameStage {...commonProps} handleSubmit={handleSubmit} />;
       case "WAITING":
         return <WaitingStage {...commonProps} onProceed={handleStageComplete} />;
       case "VOTING":
@@ -149,5 +149,46 @@ export default function PlayPage() {
     }
   };
 
-  return <div className="min-h-screen">{renderStage()}</div>;
+  const renderSubmissionForm = () => {
+    return (
+      <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-8">
+        <input
+          type="text"
+          value={playerAnswer}
+          onChange={(e) => setPlayerAnswer(e.target.value)}
+          className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="Enter your answer..."
+        />
+        <button
+          type="submit"
+          className="mt-4 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
+        >
+          Submit
+        </button>
+      </form>
+    );
+  };
+
+  if (isLoading) {
+    return <div>Loading game data...</div>;
+  }
+
+  if (error) {
+    return <div>Error loading game: {error.message}</div>;
+  }
+
+  if (!gameData) {
+    return <div>Game not found</div>;
+  }
+
+  return (
+    <div className="min-h-screen">
+      {/* Add game code display */}
+      <div className="absolute top-4 right-4 bg-gray-100 rounded-lg px-4 py-2">
+        Game Code: <span className="font-bold">{id}</span>
+      </div>
+      {renderStage()}
+      {renderSubmissionForm()}
+    </div>
+  );
 }

@@ -49,18 +49,31 @@ export default function GamePage(props) {
         <h3 className="text-2xl">Theme: {props.theme}</h3>
       </div>
       <div className="text-center pt-30 pb-0">
-        <h1 className="text-center text-8xl py-5">{props.prompt}</h1>
+        <h1 className="text-center text-8xl py-5">{submittedAnswer}</h1>
       </div>
+
+      {/* Show submitted answer if it exists */}
+      {submittedAnswer && (
+        <div className="text-center mt-8">
+          <h2 className="text-2xl">Your answer:</h2>
+          <p className="text-4xl mt-2">{submittedAnswer}</p>
+        </div>
+      )}
 
       {/* Fixed bottom section with input and timer */}
       <div className="fixed bottom-0 left-0 right-0 bg-gray-100">
-        {/* Answer submission form */}
+        {/* Answer input section */}
         <div className="max-w-md mx-auto p-4">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2">
             <input
               type="text"
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !submittedAnswer) {
+                  handleSubmit();
+                }
+              }}
               placeholder="Type your answer..."
               className="w-full px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
               autoComplete="off"
@@ -73,7 +86,7 @@ export default function GamePage(props) {
             >
               Submit
             </button>
-          </form>
+          </div>
         </div>
 
         {/* Timer */}

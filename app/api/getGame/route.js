@@ -1,8 +1,11 @@
-import { adminAPI } from "@instantdb/admin";
+import { init} from "@instantdb/admin";
 import { NextResponse } from 'next/server';
 
-const APP_ID = "7f057877-f350-4ab6-9568-2e4c235c37a2";
-const admin = adminAPI({ appId: APP_ID });
+const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
+const db = init({
+    appId: APP_ID,
+    adminToken: process.env.INSTANT_APP_ADMIN_TOKEN,
+});
 
 export async function GET(request) {
     try {
@@ -25,7 +28,7 @@ export async function GET(request) {
             },
         };
 
-        const data = await admin.query(query);
+        const data = await db.query(query);
 
         if (!data?.games?.[0]) {
             return NextResponse.json(
