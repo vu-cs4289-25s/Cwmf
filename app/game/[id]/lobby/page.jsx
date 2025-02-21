@@ -6,7 +6,7 @@ import { init } from "@instantdb/react";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-const APP_ID = "7f057877-f350-4ab6-9568-2e4c235c37a2";
+const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
 const db = init({ appId: APP_ID });
 
 async function getGameData(gameCode) {
@@ -23,6 +23,7 @@ async function getGameData(gameCode) {
 
 export default function LobbyPage() {
   const { id } = useParams();
+  const router = useRouter();
 
   const room = db.room(`lobby-${id}`, id);
 
