@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Alert from "../../../../components/Alert";
 
 export default function GamePage(props) {
   const [answer, setAnswer] = useState("");
@@ -11,13 +12,15 @@ export default function GamePage(props) {
   };
 
   useEffect(() => {
+    // FIXME: IMMEDIATELY SHOWS ALERT BECAUSE PREVIOUS SCREEN HITS 0 then RESETS. MAKE IT ONLY FOR THIS SCREEN
     if (props.timeLeft === 0 && !answer) {
-      setShowAlert(true);
+      // setShowAlert(true);
       // Auto-submit empty answer after 2 seconds
-      const timeout = setTimeout(() => {
+      const submitTimeout = setTimeout(() => {
         props.handleSubmit("");
       }, 2000);
-      return () => clearTimeout(timeout);
+
+      return () => clearTimeout(submitTimeout);
     }
   }, [props.timeLeft, answer]);
 
@@ -31,16 +34,12 @@ export default function GamePage(props) {
     <div className="flex min-h-screen flex-col">
       {/* Alert */}
       {showAlert && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg max-w-md mx-4">
-            <div className="flex items-center">
-              <div className="text-lg font-bold">Time's Up!</div>
-            </div>
-            <div className="mt-2">
-              You didn't submit an answer in time. Moving to the next stage...
-            </div>
-          </div>
-        </div>
+        <Alert
+          message="Time's Up!"
+          subtitle="You didn't submit an answer in time. Moving to the next stage..."
+          duration={2000}
+          onDismiss={() => setShowAlert(false)}
+        />
       )}
 
       <div className="text-center pt-8 pb-0">
