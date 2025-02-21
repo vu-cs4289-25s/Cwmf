@@ -6,15 +6,27 @@ import { init } from "@instantdb/react";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-const APP_ID = "7f057877-f350-4ab6-9568-2e4c235c37a2";
+const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
 const db = init({ appId: APP_ID });
 
-const roomId = "default-room";
-const room = db.room("lobby", roomId);
+async function getGameData(gameCode) {
+  const query = {
+    games: {
+      $: {
+        where: { gameCode: gameCode },
+      },
+    },
+  };
+  const { data } = await db.queryOnce(query);
+  return data.games[0];
+}
 
 export default function LobbyPage() {
   const { id } = useParams();
   const router = useRouter();
+
+  const room = db.room(`lobby-${id}`, id);
+
   const [userData, setUserData] = useState(null);
   const [gameData, setGameData] = useState(null);
 
@@ -66,28 +78,6 @@ export default function LobbyPage() {
       publishPresence({ name: userData.name });
     }
   }, [userData, publishPresence]);
-
-  useEffect(() => {
-    if (!gameData || !userData) return;
-
-    const removePlayer = () => {
-      let newPlayers =
-        gameData.players?.filter((player) => player.UUID !== userData.UUID) ||
-        [];
-
-      db.transact(db.tx.games[gameData.id].update({ players: newPlayers }));
-    };
-
-    window.addEventListener("beforeunload", removePlayer);
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "hidden") removePlayer();
-    });
-
-    return () => {
-      window.removeEventListener("beforeunload", removePlayer);
-      document.removeEventListener("visibilitychange", removePlayer);
-    };
-  }, [gameData, userData]);
 
   const startGame = async () => {
     if (!gameData) return;
@@ -170,19 +160,13 @@ export default function LobbyPage() {
         <div className="flex flex-col items-center gap-8">
           <div className="flex flex-wrap gap-8 justify-center max-w-md">
             <ul>
-              <div className="flex flex-col items-center">
-                <div className="inline-flex items-center justify-center size-16 rounded-full ring-2 ring-white bg-gray-500 text-white">
-                  <span className="text-lg font-medium">You</span>
-                </div>
-                <span className="mt-2">{userData.name}</span>
-              </div>
-              {Object.entries(peers).map(([peerId, peer]) => (
-                <span key={peerId}>
+              {Object.entries(gameData?.players).map(([playerId, player]) => (
+                <span key={playerId}>
                   <div className="flex flex-col items-center">
                     <div className="inline-flex items-center justify-center size-16 rounded-full ring-2 ring-white bg-gray-500 text-white">
                       <span className="text-lg font-medium">BJ</span>
                     </div>
-                    <span className="mt-2">{peer.name}</span>
+                    <span className="mt-2">{player.name}</span>
                   </div>
                 </span>
               ))}
