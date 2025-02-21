@@ -22,8 +22,39 @@ export default function AccountPage() {
     }));
   };
 
-  function createHost() {
-    sessionStorage.setItem("username", formData.username);
+  async function createHost() {
+    let userData = {
+      name: formData.username,
+      host: true,
+      game: gameID,
+    };
+
+    const res = await fetch("/api/user", {
+      method: "POST",
+      body: JSON.stringify(userData),
+    });
+    const data = await res.json();
+    if (data.error) {
+      setError(data.error);
+      return;
+    }
+    const user = data.user;
+
+    localStorage.setItem("UUID", user.UUID);
+    localStorage.setItem("userName", user.name);
+    localStorage.setItem("host", user.host);
+    localStorage.setItem("game", user.game);
+
+    const joinRes = await fetch(`/api/join-game/${gameID}`, {
+      method: "POST",
+      body: JSON.stringify({ user }),
+    });
+    const joinData = await joinRes.json();
+    if (data.error) {
+      setError(data.error);
+      return;
+    }
+
     router.push(`/game/${gameID}/lobby`);
   }
 

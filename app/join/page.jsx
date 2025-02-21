@@ -8,30 +8,17 @@ const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
 
 const db = init({ appId: APP_ID });
 
-async function joinGame(gameCode, userName) {
-  console.log("Joining game:", gameCode, userName);
-  const query = {
-    games: {
-      $: {
-        where: { gameCode: gameCode },
-      },
-    },
-  };
-
+async function joinGame(user) {
   try {
-    const { isLoading, error, data } = await db.queryOnce(query);
-    if (isLoading) {
-      console.log("Loading...");
-      return;
+    const res = await fetch(`/api/join-game/${user.game}`, {
+      method: "POST",
+      body: JSON.stringify({ user }),
+    });
+    const data = await res.json();
+    if (data.error) {
+      throw new Error(data.error);
     }
-
-    console.log(data);
-
-    db.transact(
-      db.tx.games[data.games[0].id].update({
-        players: [...data.games[0].players, userName],
-      })
-    );
+    return data;
   } catch (error) {
     console.error("Error joining game:", error);
   }
@@ -60,53 +47,30 @@ export default function AccountPage() {
     const gameCode = formData.code;
     const userName = formData.username;
 
-    console.log("Joining game:", gameCode, userName);
-
-    const query = {
-      games: {
-        $: {
-          where: { gameCode: gameCode },
-        },
-      },
-    };
-
-    const { data } = await db.queryOnce(query);
-    const game = data.games[0];
-
-    for (let player of game.players) {
-      if (player.name === userName) {
-        setError("Username already taken");
-        return;
-      }
-    }
-
     try {
-      const UUID = id();
-
       let user = {
-        UUID,
         name: userName,
         host: false,
         game: gameCode,
       };
-      db.transact(
-        db.tx.users[UUID].update({
-          userName,
-          host: false,
-          game: gameCode,
-        })
-      );
 
-      localStorage.setItem("UUID", UUID);
-      localStorage.setItem("userName", userName);
-      localStorage.setItem("host", false);
-      localStorage.setItem("game", game.gameCode);
+      const res = await fetch("/api/user", {
+        method: "POST",
+        body: JSON.stringify(user),
+      });
+      const data = await res.json();
+      if (data.error) {
+        setError(data.error);
+        return;
+      }
+      user = data.user;
 
-      db.transact(
-        db.tx.games[data.games[0].id].update({
-          players: [...data.games[0].players, user],
-        })
-      );
+      localStorage.setItem("UUID", user.UUID);
+      localStorage.setItem("userName", user.name);
+      localStorage.setItem("host", user.host);
+      localStorage.setItem("game", user.game);
+
+      await joinGame(user);
 
       router.push(`/game/${formData.code}/lobby`);
     } catch (error) {
