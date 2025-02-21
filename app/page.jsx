@@ -1,37 +1,62 @@
+//app/page.jsx
 "use client";
 
 import Link from "next/link";
 import { id, i, init, InstaQLEntity } from "@instantdb/react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { join } from "path";
+import { useEffect } from "react";
 
 // ID for app: cwmf
-const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
+const APP_ID = "7f057877-f350-4ab6-9568-2e4c235c37a2";
 
 const db = init({ appId: APP_ID });
 
 function LandingPage() {
   const router = useRouter();
 
+  useEffect(() => {
+    localStorage.setItem("UUID", "");
+    localStorage.setItem("userName", "");
+    localStorage.setItem("host", false);
+    localStorage.setItem("game", "");
+  }, []);
+
   function createGame(gameCode, userName) {
     try {
-      db.transact(db.tx.games[id()].update({
-        gameCode,
-        status: 'waiting',
-        players: [userName],
-      }));
+      const UUID = id();
+      let user = {
+        UUID,
+        name: userName,
+        host: true,
+        game: gameCode,
+      };
+      db.transact(
+        db.tx.users[UUID].update({
+          userName: user.name,
+          host: user.host,
+          game: user.game,
+        })
+      );
+
+      localStorage.setItem("userName", user.name);
+      localStorage.setItem("UUID", UUID);
+      localStorage.setItem("host", user.host);
+      localStorage.setItem("game", user.game);
+
+      db.transact(
+        db.tx.games[id()].update({
+          gameCode,
+          status: "waiting",
+          players: [user],
+        })
+      );
       // Navigate to the game page
-      //router.push(`/game/${gameCode}`);
+      router.push(`/game/${gameCode}/create`);
     } catch (error) {
-      console.error('Error creating game:', error);
+      console.error("Error creating game:", error);
     }
   }
-
-  function deleteGoals() {
-    db.transact(goalers.map((g) => db.tx.goalers[g.id].delete()));
-  }
-
-
 
   return (
     <div className="h-screen">
@@ -65,8 +90,12 @@ function LandingPage() {
             <button
               type="button"
               className="w-full rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 h-12 w-md"
-              onClick={() => createGame(Math.floor(Math.random() * 900000 + 100000).toString(), "Player")}
-              //onClick={() => joinGame("141135", "Player2")}
+              onClick={() =>
+                createGame(
+                  Math.floor(Math.random() * 900000 + 100000).toString(),
+                  "Host"
+                )
+              }
             >
               Create Game
             </button>

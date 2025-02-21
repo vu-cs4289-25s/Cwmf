@@ -33,9 +33,8 @@ export default function VotingStage(props) {
               setVote(answer);
             }}
             key={index}
-            className={`${
-              answer === vote ? "bg-blue-400" : "bg-gray-300"
-            } w-3/4 rounded-md p-3`}
+            className={`${answer === vote ? "bg-blue-400" : "bg-gray-300"
+              } w-3/4 rounded-md p-3`}
           >
             <p className="text-2xl">{answer}</p>
           </button>

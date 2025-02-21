@@ -1,208 +1,147 @@
 // app/game/[id]/play/page.js
 "use client";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from 'next/navigation';
 import { init } from "@instantdb/react";
-
-// Import stages
 import PrepStage from "./stages/PrepStage";
 import GameStage from "./stages/GameStage";
 import WaitingStage from "./stages/WaitingStage";
 import VotingStage from "./stages/VotingStage";
 import ResultsStage from "./stages/ResultsStage";
-import ShowSubmissionsStage from "./stages/ShowSubmissionsStage";
 
-const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
+const APP_ID = "7f057877-f350-4ab6-9568-2e4c235c37a2";
 const db = init({ appId: APP_ID });
 
-// Add this function near your other database functions
-async function submitAnswer(gameId, playerId, answer) {
-  try {
-    const submission = {
-      playerId,
-      answer,
-      timestamp: Date.now(),
-    };
-    
-    await db.transact([{
-      games: {
-        $gameCode: gameId,
-        roundData: {
-          submission: submission
-        }
-      }
-    }]);
-    
-    return { success: true };
-  } catch (error) {
-    console.error('Error submitting answer:', error);
-    return { success: false, error };
-  }
-}
+export default function PlayPage() {
+  const params = useParams();
+  const [answers, setAnswers] = useState([]);
+  const [localTimeLeft, setLocalTimeLeft] = useState(null);
 
-export default function PlayPage({ params }) {
-  const { id } = use(params);
-  const [stage, setStage] = useState("PREP");
-  const [currentRound, setCurrentRound] = useState(5);
-  const [timeLeft, setTimeLeft] = useState(5);
-  const [gameData, setGameData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [playerAnswer, setPlayerAnswer] = useState('');
-  
-  // Query game data with actual fields from DB
-  
-  async function getGameData(gameCode) {
-    const query = {
-      games: {
-        $: {
-          where: { gameCode: gameCode },
-        },
+  // Subscribe to game state
+  const { data } = db.useQuery({
+    games: {
+      $: {
+        where: { gameCode: params.id },
       },
-    };
-    const { isLoading, error, data } = await db.queryOnce(query);
-    if (isLoading) {
-      return { error: "Loading..." };
-    }
-    return data.games[0];
-  }
+    },
+  });
 
-  // Fetch game data on component mount
-  useEffect(() => {
-    const fetchGame = async () => {
-      try {
-        const data = await getGameData(id);
-        if (!data) {
-          setError(new Error("Game not found"));
-        } else {
-          setGameData(data);
-        }
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchGame();
-  }, [id]);
+  const game = data?.games?.[0];
 
-  // Timer logic
+  // Function to calculate current time left based on server data
+  const calculateTimeLeft = () => {
+    if (!game || !game.isTimerRunning) return game?.timeLeft || 0;
+
+    const now = Date.now();
+    const elapsed = Math.floor((now - game.timerStart) / 1000);
+    return Math.max(0, game.timeLeft - elapsed);
+  };
+
+  // Update local timer every second and check for stage completion
   useEffect(() => {
+    if (!game) return;
+
     const interval = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 0) {
-          clearInterval(interval);
-          handleTimeUp();
-          return 0;
-        }
-        return prevTime - 1;
-      });
+      const timeLeft = calculateTimeLeft();
+      setLocalTimeLeft(timeLeft);
+
+      // If timer has reached 0, handle stage completion
+      if (timeLeft === 0 && game.isTimerRunning) {
+        handleStageComplete();
+        clearInterval(interval);
+      }
     }, 1000);
+
+    // Initial calculation
+    setLocalTimeLeft(calculateTimeLeft());
+
     return () => clearInterval(interval);
-  }, [stage]);
+  }, [game?.timerStart, game?.timeLeft, game?.isTimerRunning]);
 
-  const handleTimeUp = () => {
-    switch (stage) {
-      case "PREP":
-        setStage("GAME");
-        setTimeLeft(30);
-        break;
-      case "WAITING":
-        setStage("VOTING");
-        setTimeLeft(45);
-        break;
-      case "VOTING":
-        setStage("RESULTS");
-        setTimeLeft(5);
-        break;
-      case "RESULTS":
-        handleNextRound();
-        break;
-    }
+  const handleStageComplete = async () => {
+    if (!game) return;
+
+    const nextStage = getNextStage(game.currentStage);
+    const nextDuration = getStageDuration(nextStage);
+
+    await db.transact(db.tx.games[game.id].update({
+      currentStage: nextStage,
+      timerStart: Date.now(),
+      timeLeft: nextDuration,
+      isTimerRunning: true,
+      currentRound: nextStage === "PREP" ? (game.currentRound || 1) + 1 : (game.currentRound || 1)
+    }));
   };
 
-  const handleNextRound = () => {
-    setCurrentRound((prev) => prev + 1);
-    setStage("PREP");
-    setTimeLeft(30);
-    // Clear roundData for next round
-    if (gameData) {
-      db.transact([{
-        games: {
-          $id: gameData.id,
-          roundData: [] // Reset roundData for the new round
-        }
-      }]);
-    }
+  const getNextStage = (currentStage) => {
+    const stages = {
+      "PREP": "GAME",
+      "GAME": "WAITING",
+      "WAITING": "VOTING",
+      "VOTING": "RESULTS",
+      "RESULTS": "PREP"
+    };
+    return stages[currentStage] || "PREP";
   };
 
-  const handleSubmit = async (answer) => {
-    if (!answer.trim()) return;
+  const getStageDuration = (stageName) => {
+    const durations = {
+      "PREP": 5,
+      "GAME": 30,
+      "WAITING": 10,
+      "VOTING": 45,
+      "RESULTS": 5
+    };
+    return durations[stageName] || 30;
+  };
 
-    try {
-        // You'll need to implement a way to get the current player ID
-        const playerId = 'current-player-id'; // Replace with actual player ID logic
-        
-        const response = await fetch('/api/submitAnswer', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                gameId: id,
-                playerId,
-                answer,
-            }),
-        });
-
-        const result = await response.json();
-        
-        if (response.ok) {
-            setStage("WAITING");
-            setTimeLeft(30);
-        } else {
-            console.error('Failed to submit answer:', result.error);
-        }
-    } catch (error) {
-        console.error('Error:', error);
+  const handleSubmitAnswer = (answer) => {
+    if (answer !== "") {
+      // Store answer in the database
+      const updatedAnswers = [...(game.answers || []), answer];
+      db.transact(db.tx.games[game.id].update({
+        answers: updatedAnswers
+      }));
+      setAnswers(updatedAnswers);
+      handleStageComplete();
     }
   };
 
   const renderStage = () => {
+    if (!game) return <div>Loading...</div>;
+
     const commonProps = {
-      currentRound,
-      timeLeft,
-      theme: "Things a pirate would say",
-      prompt: "BBL",
+      currentRound: game.currentRound || 1,
+      timeLeft: localTimeLeft ?? game.timeLeft,
+      theme: game.theme || "Things a pirate would say",
+      prompt: game.prompt || "BBL",
+      users: game.players || [],
     };
 
-    switch (stage) {
+    switch (game.currentStage) {
       case "PREP":
         return <PrepStage {...commonProps} />;
       case "GAME":
         return <GameStage {...commonProps} handleSubmit={handleSubmit} />;
       case "WAITING":
-        return (
-          <WaitingStage
-            {...commonProps}
-            yourAnswer={gameData?.answers?.find(a => a.userId === "current-user-id")?.text}
-            onProceed={() => setStage("VOTING")}
-          />
-        );
+        return <WaitingStage {...commonProps} onProceed={handleStageComplete} />;
       case "VOTING":
         return (
           <VotingStage
             {...commonProps}
-            answers={gameData?.answers?.map(a => a.text) || []}
-            handleVote={(vote) => console.log(vote)}
+            answers={game.answers || []}
+            handleVote={(vote) => {
+              console.log(vote);
+              handleStageComplete();
+            }}
           />
         );
       case "RESULTS":
         return (
           <ResultsStage
             {...commonProps}
-            answers={gameData?.answers || []}
-            onNext={handleNextRound}
+            answers={game.answers || []}
+            onNext={handleStageComplete}
           />
         );
       default:
