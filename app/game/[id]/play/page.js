@@ -108,19 +108,14 @@ export default function PlayPage() {
   const handleSubmitAnswer = async (answer) => {
     if (!game) return;
 
-    // Only consider it a submission if it came from a user action (not an auto-timeout)
-    // answer will be null for initial state, empty string for timeout
-    if (answer !== null) {
+    if (answer !== "") {
+      // Store answer in the database
+      const updatedAnswers = [...(game.answers || []), answer];
+      await db.transact(db.tx.games[game.id].update({
+        answers: updatedAnswers,
+        submittedPlayers: [...(game.submittedPlayers || []), "currentPlayerId"] // Store who submitted
+      }));
       setHasSubmitted(true);
-
-      if (answer.trim() !== "") {
-        // Only store non-empty answers in the database
-        const updatedAnswers = [...(game.answers || []), answer];
-        await db.transact(db.tx.games[game.id].update({
-          answers: updatedAnswers,
-          submittedPlayers: [...(game.submittedPlayers || []), "currentPlayerId"]
-        }));
-      }
     }
   };
 
