@@ -10,16 +10,15 @@ const db = init({
 export async function POST(request) {
     try {
         const body = await request.json();
-        const { gameCode, playerId, answer } = body;
+        const { gameCode, playerId, answer, roundId } = body;
 
         // Validate required fields
-        if (!gameCode || !playerId || !answer) {
+        if (!gameCode || !playerId || !answer || !roundId) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
                 { status: 400 }
             );
         }
-        const roundId = id()
 
         const query = {
             games: {
@@ -39,18 +38,21 @@ export async function POST(request) {
         }
         const gameId = data.games[0].id;
 
-        // Update the round and game using correct InstantDB syntax
+        //create a submission in the submissions table
+        const submissionId = id();
         const res = await db.transact([
-            db.tx.round[roundId].update({
-                submissions: {
-                    [playerId]: {
-                        answer,
-                        timestamp: Date.now()
-                    }
-                }
+            db.tx.submissions[submissionId].update({
+                answer,
+                timestamp: Date.now(),
+                gameCode,
+                roundId,
+                playerId
             }),
             db.tx.games[gameId].link({
-                roundData: roundId
+                submissions: submissionId
+            }),
+            db.tx.round[roundId].link({
+                submissions: submissionId
             })
         ]);
 

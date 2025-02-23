@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { init } from "@instantdb/react";
 
-const APP_ID = "7f057877-f350-4ab6-9568-2e4c235c37a2";
+const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
 const db = init({ appId: APP_ID });
 
 export function useGameTimer(initialTime = 30) {
