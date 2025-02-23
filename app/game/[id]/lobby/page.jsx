@@ -2,7 +2,8 @@
 "use client";
 
 import Link from "next/link";
-import { init } from "@instantdb/react";
+import { init} from "@instantdb/react";
+import { id as instantID } from "@instantdb/admin";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
@@ -83,7 +84,24 @@ export default function LobbyPage() {
     if (!gameData) return;
 
     try {
-      await db.transact(
+      // Create the first round
+      const firstRoundId = instantID();
+      await db.transact([
+        // Create the round
+        db.tx.round[firstRoundId].update({
+          id: firstRoundId,
+          gameId: gameData.id,
+          roundNumber: 1,
+          answers: [],
+          submittedPlayers: [],
+          votes: [],
+          theme: "Things a pirate would say",
+          prompt: "BBL",
+        }),
+        db.tx.games[gameData.id].link({
+          roundData: firstRoundId
+        }),
+        // Update game state
         db.tx.games[gameData.id].update({
           status: "active",
           currentStage: "PREP",
@@ -96,17 +114,17 @@ export default function LobbyPage() {
           theme: "Things a pirate would say",
           prompt: "BBL",
         })
-      );
+      ]);
 
-      // Redirect all players to the game
+      // Redirect all players to the game with roundId
       await db.transact(
         db.tx.games[gameData.id].update({
           shouldRedirect: true,
-          redirectTo: `/game/${id}/play`,
+          redirectTo: `/game/${id}/play/${firstRoundId}`,
         })
       );
 
-      router.push(`/game/${id}/play`);
+      router.push(`/game/${id}/play/${firstRoundId}`);
     } catch (error) {
       console.error("Error starting game:", error);
     }

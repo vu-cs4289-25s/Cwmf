@@ -48,11 +48,11 @@ export async function POST(request) {
                 roundId,
                 playerId
             }),
-            db.tx.games[gameId].link({
-                submissions: submissionId
-            }),
             db.tx.round[roundId].link({
                 submissions: submissionId
+            }),
+            db.tx.games[gameId].link({
+                roundData: roundId
             })
         ]);
 
