@@ -135,23 +135,23 @@ export default function LobbyPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-background-blue">
       <div className="text-center pt-8 pb-0">
-        <h3 className="text-2xl">Game Code: {id}</h3>
-        <h1 className="text-center text-8xl py-5">CWMF</h1>
+        <h3 className="text-2xl font-sans text-primary-blue">game code: {id}</h3>
+        <h1 className="text-center text-8xl py-5 text-primary-blue font-sans">cwmf</h1>
       </div>
 
       <div className="flex flex-1 justify-center items-center gap-20 px-8 -mt-80">
-        <div className="bg-white shadow-lg rounded-lg p-6 w-80">
-          <h2 className="text-xl font-bold mb-4 text-center">Game Settings</h2>
+        <div className="bg-off-white shadow-lg rounded-lg p-6 w-80">
+          <h2 className="text-xl font-semibold mb-4 text-center font-sans tracking-wide text-primary-blue">game settings</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-gray-700 mb-2">Round Time</label>
-              <p>30 seconds</p>
+              <label className="block text-primary-blue mb-2 font-sans">round time</label>
+              <p className="font-sans text-gray-600">30 seconds</p>
             </div>
             <div>
-              <label className="block text-gray-700 mb-2">Theme</label>
-              <p>Things a pirate would say</p>
+              <label className="block text-primary-blue font-sans mb-2">theme</label>
+              <p className="font-sans text-gray-600">things a pirate would say</p>
             </div>
             <div className="flex gap-4">
               {userData?.host === "true" && (
