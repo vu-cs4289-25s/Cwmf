@@ -2,8 +2,8 @@ import { init, id } from "@instantdb/admin";
 import { NextResponse } from "next/server";
 
 const db = init({
-  appId: "98c74b4a-d255-4e76-a706-87743b5d7c07",
-  adminToken: "b84ac821-3fbc-42ca-a6a3-c22b5cbcc41d",
+  appId: process.env.INSTANT_APP_ID,
+  adminToken: process.env.INSTANT_APP_ADMIN_TOKEN,
 });
 
 export async function POST(request, { params }) {
