@@ -10,7 +10,7 @@ export default {
       colors: {
         "background-blue": "#9ACBD0",
         "primary-blue": "#22658B",
-        "button-text": "#F2EFE7",
+        "off-white": "#F2EFE7",
         "hover-blue": "#0B364E",
       },
       fontFamily: {
