@@ -84,7 +84,7 @@ export default function LobbyPage() {
     if (!gameData) return;
 
     try {
-      const res = await fetch(`/api/start-game/${gameData.id}`, {
+      const res = await fetch(`/api/start-game/${gameData.gameCode}`, {
         method: "POST",
       });
       const data = await res.json();
@@ -92,6 +92,8 @@ export default function LobbyPage() {
         console.error(data.error);
         return;
       }
+
+      const firstRoundId = data.firstRoundId;
       /*
       await db.transact(
         db.tx.games[gameData.id].update({
@@ -117,7 +119,7 @@ export default function LobbyPage() {
       //   })
       // );
 
-      router.push(`/game/${id}/play/${firstRoundId}`);
+      router.push(`/game/${gameData.gameCode}/play/${firstRoundId}`);
     } catch (error) {
       console.error("Error starting game:", error);
     }

@@ -58,26 +58,12 @@ export async function POST(request) {
       })
     );
 
-    const firstRoundId = id();
-    // await db.transact(
-    //   db.tx.round[firstRoundId].update({
-    //     id: firstRoundId,
-    //     gameId: gameCode,
-    //     roundNumber: 1,
-    //     answers: [],
-    //     submittedPlayers: [],
-    //     votes: [],
-    //   }),
-    //   db.tx.games[gameId].link({
-    //     roundData: firstRoundId
-    //   })
-    // );
-    
-
-    return NextResponse.json({ 
-      game,
-      firstRoundId 
-    }, { status: 200 });
+    return NextResponse.json(
+      {
+        game,
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error creating game:", error);
     return NextResponse.json(
