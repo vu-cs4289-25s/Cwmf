@@ -19,7 +19,7 @@ export default function GamePage(props) {
     if (props.timeLeft === 0 && !answer) {
       handleSubmitAnswer(""); // Empty submission
     }
-  }, [props.timeLeft, answer]);
+  }, [props.timeLeft, answer]); 
 
   const handleSubmitAnswer = async (answerText) => {
     try {
