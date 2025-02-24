@@ -3,10 +3,11 @@
 
 import Link from "next/link";
 import { init } from "@instantdb/react";
+import { id as instantID } from "@instantdb/admin";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
+const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
 const db = init({ appId: APP_ID });
 
 async function getGameData(gameCode) {
@@ -116,7 +117,7 @@ export default function LobbyPage() {
       //   })
       // );
 
-      router.push(`/game/${id}/play`);
+      router.push(`/game/${id}/play/${firstRoundId}`);
     } catch (error) {
       console.error("Error starting game:", error);
     }

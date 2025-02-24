@@ -1,25 +1,24 @@
 import { init, id } from '@instantdb/admin';
 import { NextResponse } from 'next/server';
 
-const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
+const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
 const db = init({
     appId: APP_ID,
-    adminToken: process.env.INSTANT_APP_ADMIN_TOKEN,
+    adminToken: process.env.NEXT_PUBLIC_INSTANT_APP_ADMIN_TOKEN,
 });
 
 export async function POST(request) {
     try {
         const body = await request.json();
-        const { gameCode, playerId, answer } = body;
+        const { gameCode, playerId, answer, roundId } = body;
 
         // Validate required fields
-        if (!gameCode || !playerId || !answer) {
+        if (!gameCode || !playerId || !answer || !roundId) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
                 { status: 400 }
             );
         }
-        const roundId = id()
 
         const query = {
             games: {
@@ -39,15 +38,18 @@ export async function POST(request) {
         }
         const gameId = data.games[0].id;
 
-        // Update the round and game using correct InstantDB syntax
+        //create a submission in the submissions table
+        const submissionId = id();
         const res = await db.transact([
-            db.tx.round[roundId].update({
-                submissions: {
-                    [playerId]: {
-                        answer,
-                        timestamp: Date.now()
-                    }
-                }
+            db.tx.submissions[submissionId].update({
+                answer,
+                timestamp: Date.now(),
+                gameCode,
+                roundId,
+                playerId
+            }),
+            db.tx.round[roundId].link({
+                submissions: submissionId
             }),
             db.tx.games[gameId].link({
                 roundData: roundId

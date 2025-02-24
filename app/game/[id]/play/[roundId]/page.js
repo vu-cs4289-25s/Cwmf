@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { init } from "@instantdb/react";
-import PrepStage from "./stages/PrepStage";
-import GameStage from "./stages/GameStage";
-import WaitingStage from "./stages/WaitingStage";
-import VotingStage from "./stages/VotingStage";
-import ResultsStage from "./stages/ResultsStage";
+import PrepStage from "../stages/PrepStage";
+import GameStage from "../stages/GameStage";
+import WaitingStage from "../stages/WaitingStage";
+import VotingStage from "../stages/VotingStage";
+import ResultsStage from "../stages/ResultsStage";
 
 const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
 const db = init({ appId: APP_ID });

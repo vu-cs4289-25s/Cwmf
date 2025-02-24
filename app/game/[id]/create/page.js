@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { id, i, init, InstaQLEntity } from "@instantdb/react";
 import Link from "next/link";
 
 export default function AccountPage() {
   const router = useRouter();
   const gameID = useParams().id;
+  const searchParams = useSearchParams();
+  const roundId = searchParams.get('roundId');
 
   const [formData, setFormData] = useState({
     username: "",
