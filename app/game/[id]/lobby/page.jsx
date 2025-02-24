@@ -6,7 +6,7 @@ import { init } from "@instantdb/react";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-const APP_ID = "7f057877-f350-4ab6-9568-2e4c235c37a2";
+const APP_ID = "98c74b4a-d255-4e76-a706-87743b5d7c07";
 const db = init({ appId: APP_ID });
 
 async function getGameData(gameCode) {
@@ -30,7 +30,7 @@ export default function LobbyPage() {
   const [userData, setUserData] = useState(null);
   const [gameData, setGameData] = useState({});
 
-  const { data, isLoading, error } = db.useQuery({
+  const { data } = db.useQuery({
     games: {
       $: {
         where: { gameCode: id },
@@ -83,6 +83,15 @@ export default function LobbyPage() {
     if (!gameData) return;
 
     try {
+      const res = await fetch(`/api/start-game/${gameData.id}`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (data.error) {
+        console.error(data.error);
+        return;
+      }
+      /*
       await db.transact(
         db.tx.games[gameData.id].update({
           status: "active",
@@ -97,14 +106,15 @@ export default function LobbyPage() {
           prompt: "BBL",
         })
       );
+      */
 
       // Redirect all players to the game
-      await db.transact(
-        db.tx.games[gameData.id].update({
-          shouldRedirect: true,
-          redirectTo: `/game/${id}/play`,
-        })
-      );
+      // await db.transact(
+      //   db.tx.games[gameData.id].update({
+      //     shouldRedirect: true,
+      //     redirectTo: `/game/${id}/play`,
+      //   })
+      // );
 
       router.push(`/game/${id}/play`);
     } catch (error) {

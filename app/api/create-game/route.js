@@ -25,35 +25,35 @@ export async function POST(request) {
 
     let game = {
       gameCode,
-      status: "waiting",
       players: [],
       roundLength: 30,
-      theme: "default",
+      status: "active",
+      currentStage: "PREP",
+      currentRound: 1,
+      timerStart: Date.now(),
+      timeLeft: 5,
+      isTimerRunning: false,
+      answers: [],
+      scores: {},
+      theme: "Things a pirate would say",
+      prompt: "BBL",
     };
-    /*
-        const UUID = id();
-        let user = {
-            UUID,
-            name: userName,
-            host: true,
-            game: gameCode,
-        };
-
-        await db.transact(
-            db.tx.users[UUID].update({
-                userName: user.name,
-                host: user.host,
-                game: user.game,
-            })
-        ); */
 
     await db.transact(
       db.tx.games[id()].update({
         gameCode,
-        status: "waiting",
-        players: [],
-        roundLength: 30,
-        theme: "default",
+        players: game.players,
+        roundLength: game.roundLength,
+        status: game.status,
+        currentStage: game.currentStage,
+        currentRound: game.currentRound,
+        timerStart: game.timerStart,
+        timeLeft: game.timeLeft,
+        isTimerRunning: game.isTimerRunning,
+        answers: game.answers,
+        scores: game.scores,
+        theme: game.theme,
+        prompt: game.prompt,
       })
     );
 
