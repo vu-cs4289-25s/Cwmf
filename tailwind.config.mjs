@@ -8,8 +8,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        "background-blue": "#9ACBD0",
+        "primary-blue": "#22658B",
+        "button-text": "#F2EFE7",
+        "hover-blue": "#0B364E",
+      },
+      fontFamily: {
+        sans: ["Tilt Warp", "sans-serif"],
       },
     },
   },
