@@ -3,7 +3,7 @@ const { createClient } = require('@instantdb/core');
 class GameDatabase {
   constructor() {
     this.db = createClient({
-      apiKey: process.env.INSTANT_APP_ID
+      apiKey: process.env.NEXT_PUBLIC_INSTANT_APP_ID
     });
   }
 

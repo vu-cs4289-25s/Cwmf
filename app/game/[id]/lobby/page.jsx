@@ -7,7 +7,7 @@ import { id as instantID } from "@instantdb/admin";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-const APP_ID = process.env.INSTANT_APP_ID;
+const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
 const db = init({ appId: APP_ID });
 
 async function getGameData(gameCode) {

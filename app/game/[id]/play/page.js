@@ -9,7 +9,7 @@ import WaitingStage from "./stages/WaitingStage";
 import VotingStage from "./stages/VotingStage";
 import ResultsStage from "./stages/ResultsStage";
 
-const APP_ID = process.env.INSTANT_APP_ID;
+const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
 const db = init({ appId: APP_ID });
 
 export default function PlayPage() {

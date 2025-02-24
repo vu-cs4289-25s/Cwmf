@@ -1,10 +1,10 @@
 import { init} from "@instantdb/admin";
 import { NextResponse } from 'next/server';
 
-const APP_ID = process.env.INSTANT_APP_ID;
+const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
 const db = init({
     appId: APP_ID,
-    adminToken: process.env.INSTANT_APP_ADMIN_TOKEN,
+    adminToken: process.env.NEXT_PUBLIC_INSTANT_APP_ADMIN_TOKEN,
 });
 
 export async function GET(request) {

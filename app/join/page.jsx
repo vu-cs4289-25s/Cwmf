@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { id, i, init, InstaQLEntity } from "@instantdb/react";
 
-const APP_ID = process.env.INSTANT_APP_ID;
+const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
 
 const db = init({ appId: APP_ID });
 
