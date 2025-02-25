@@ -157,18 +157,18 @@ export default function LobbyPage() {
               {userData?.host === "true" && (
                 <button
                   type="button"
-                  className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  className="flex w-full justify-center rounded-md bg-primary-blue px-3 py-1.5 text-sm/6 font-semibold font-sans tracking-wide text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
-                  Edit
+                  edit
                 </button>
               )}
               {userData?.host === "true" && (
                 <button
                   type="button"
-                  className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  className="flex w-full justify-center rounded-md bg-primary-blue px-3 py-1.5 text-sm/6 font-semibold font-sans tracking-wide text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                   onClick={startGame}
                 >
-                  Start Game
+                  start game
                 </button>
               )}
             </div>
@@ -183,10 +183,10 @@ export default function LobbyPage() {
                 Object.entries(gameData?.players).map(([playerId, player]) => (
                   <span key={playerId}>
                     <div className="flex flex-col items-center">
-                      <div className="inline-flex items-center justify-center size-16 rounded-full ring-2 ring-white bg-gray-500 text-white">
-                        <span className="text-lg font-medium">BJ</span>
+                      <div className="inline-flex items-center justify-center size-16 rounded-full ring-2 ring-off-white bg-primary-blue text-off-white mt-4">
+                        <span className="text-lg font-sans font-bold">{player.name[0].toUpperCase()}</span>
                       </div>
-                      <span className="mt-2">{player.name}</span>
+                      <span className="mt-2 font-sans text-primary-blue">{player.name}</span>
                     </div>
                   </span>
                 ))}
