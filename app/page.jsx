@@ -6,6 +6,7 @@ import { id, i, init, InstaQLEntity } from "@instantdb/react";
 import { useRouter } from "next/navigation";
 import { join } from "path";
 import { useEffect } from "react";
+import { TypingAnimation } from "src/components/magicui/typing-animation";
 
 // ID for app: cwmf
 const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
@@ -42,7 +43,10 @@ function LandingPage() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-screen">
         <div className="mx-auto max-w-3xl flex h-full">
           <div className="w-full m-auto justify-center items-center flex flex-col">
-            <h1 className="text-center text-8xl py-5 text-primary-blue font-sans">cwmf</h1>
+            <h1 className="text-center text-8xl py-3 text-primary-blue font-sans">cwmf</h1>
+            <div className="mb-10 h-14">
+            <TypingAnimation className="font-sans text-primary-blue text-4xl" duration="200" delay="200">cool word mind fun...</TypingAnimation>
+            </div>
             <Link href="/join">
               <button
                 type="button"
