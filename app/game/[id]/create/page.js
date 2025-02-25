@@ -9,7 +9,7 @@ export default function AccountPage() {
   const router = useRouter();
   const gameID = useParams().id;
   const searchParams = useSearchParams();
-  const roundId = searchParams.get('roundId');
+  const roundId = searchParams.get("roundId");
 
   const [formData, setFormData] = useState({
     username: "",
@@ -62,10 +62,14 @@ export default function AccountPage() {
 
   return (
     <>
-      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+      <div className="flex h-screen flex-1 flex-col justify-center px-6 py-12 lg:px-8 bg-background-blue">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <h1 className="text-center text-8xl py-5">CWMF</h1>
-          <h3 className="text-2xl text-center">Game code: {gameID}</h3>
+          <h1 className="text-center text-8xl py-5 text-primary-blue font-sans">
+            cwmf
+          </h1>
+          <h3 className="text-2xl font-sans text-primary-blue text-center">
+            game code: {gameID}
+          </h3>
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
@@ -79,9 +83,9 @@ export default function AccountPage() {
             <div>
               <label
                 htmlFor="username"
-                className="block text-sm/6 font-medium text-gray-900"
+                className="block text-xl font-medium text-primary-blue font-sans"
               >
-                Username
+                username
               </label>
               <div className="mt-2">
                 <input
@@ -92,17 +96,17 @@ export default function AccountPage() {
                   value={formData.username}
                   onChange={handleInputChange}
                   autoComplete="username"
-                  className="block w-full rounded-md bg-gray-200 px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  className="block w-full rounded-md bg-off-white px-3 py-1.5 text-primary-blue font-sans placeholder:text-gray-400 focus:outline-2  focus:outline-primary-blue text-xl h-12"
                 />
               </div>
             </div>
 
-            <div>
+            <div className="flex justify-center w-full">
               <button
-                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="w-72 rounded-md bg-primary-blue px-3.5 py-2.5 text-2xl font-semibold font-sans text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 h-16 tracking-wide"
                 onClick={() => createHost()}
               >
-                Start Game
+                start game
               </button>
             </div>
           </div>

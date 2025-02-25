@@ -87,20 +87,20 @@ export default function PlayPage() {
 
   const getNextStage = (currentStage) => {
     const stages = {
-      "PREP": "GAME",
-      "GAME": "VOTING", // Everyone goes to voting when time expires
-      "VOTING": "RESULTS",
-      "RESULTS": "PREP"
+      PREP: "GAME",
+      GAME: "VOTING", // Everyone goes to voting when time expires
+      VOTING: "RESULTS",
+      RESULTS: "PREP",
     };
     return stages[currentStage] || "PREP";
   };
 
   const getStageDuration = (stageName) => {
     const durations = {
-      "PREP": 5,     // 5 seconds to prepare
-      "GAME": 30,    // 30 seconds to enter answer
-      "VOTING": 15,  // 15 seconds to vote
-      "RESULTS": 10  // 10 seconds to show results
+      PREP: 5, // 5 seconds to prepare
+      GAME: 30, // 30 seconds to enter answer
+      VOTING: 15, // 15 seconds to vote
+      RESULTS: 10, // 10 seconds to show results
     };
     return durations[stageName] || 30;
   };
@@ -111,10 +111,15 @@ export default function PlayPage() {
     if (answer !== "") {
       // Store answer in the database
       const updatedAnswers = [...(game.answers || []), answer];
-      await db.transact(db.tx.games[game.id].update({
-        answers: updatedAnswers,
-        submittedPlayers: [...(game.submittedPlayers || []), "currentPlayerId"] // Store who submitted
-      }));
+      await db.transact(
+        db.tx.games[game.id].update({
+          answers: updatedAnswers,
+          submittedPlayers: [
+            ...(game.submittedPlayers || []),
+            "currentPlayerId",
+          ], // Store who submitted
+        })
+      );
       setHasSubmitted(true);
     }
   };

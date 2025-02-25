@@ -22,7 +22,11 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "baseUrl": "./",  
+    "paths": {
+      "shadcn": ["node_modules/shadcn"]
+    }
   },
   "include": [
     "next-env.d.ts",
