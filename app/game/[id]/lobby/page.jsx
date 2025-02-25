@@ -2,25 +2,13 @@
 "use client";
 
 import Link from "next/link";
-import { init} from "@instantdb/react";
+import { init } from "@instantdb/react";
 import { id as instantID } from "@instantdb/admin";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
 const db = init({ appId: APP_ID });
-
-async function getGameData(gameCode) {
-  const query = {
-    games: {
-      $: {
-        where: { gameCode: gameCode },
-      },
-    },
-  };
-  const { data } = await db.queryOnce(query);
-  return data.games[0];
-}
 
 export default function LobbyPage() {
   const { id } = useParams();
@@ -99,7 +87,7 @@ export default function LobbyPage() {
           prompt: "BBL",
         }),
         db.tx.games[gameData.id].link({
-          roundData: firstRoundId
+          roundData: firstRoundId,
         }),
         // Update game state
         db.tx.games[gameData.id].update({
@@ -113,7 +101,7 @@ export default function LobbyPage() {
           scores: {},
           theme: "Things a pirate would say",
           prompt: "BBL",
-        })
+        }),
       ]);
 
       // Redirect all players to the game with roundId

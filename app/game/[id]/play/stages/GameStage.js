@@ -19,12 +19,15 @@ export default function GamePage(props) {
     if (props.timeLeft === 0 && !answer) {
       handleSubmitAnswer(""); // Empty submission
     }
-  }, [props.timeLeft, answer]); 
+  }, [props.timeLeft, answer]);
 
   const handleSubmitAnswer = async (answerText) => {
     try {
       const playerId = localStorage.getItem("UUID"); // Get the player's UUID
-      
+
+      // Save the answer to localStorage for the current round
+      localStorage.setItem(`answer_${gameId}_${props.currentRound}`, answerText);
+
       const response = await fetch('/api/submitAnswer', {
         method: 'POST',
         headers: {
@@ -84,7 +87,7 @@ export default function GamePage(props) {
             className="w-3/4 p-3 text-xl border rounded"
             placeholder="Type your answer..."
           />
-          <button 
+          <button
             type="submit"
             className="mt-4 px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
