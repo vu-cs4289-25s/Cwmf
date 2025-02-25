@@ -137,8 +137,8 @@ export default function LobbyPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background-blue">
       <div className="text-center pt-8 pb-0">
-        <h3 className="text-2xl font-sans text-primary-blue">game code: {id}</h3>
         <h1 className="text-center text-8xl py-5 text-primary-blue font-sans">cwmf</h1>
+        <h3 className="text-2xl font-sans text-primary-blue">game code: {id}</h3>
       </div>
 
       <div className="flex flex-1 justify-center items-center gap-20 px-8 -mt-80">

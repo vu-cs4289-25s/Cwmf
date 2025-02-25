@@ -110,7 +110,7 @@ export default function AccountPage() {
                   value={formData.username}
                   onChange={handleInputChange}
                   autoComplete="username"
-                  className="block w-full rounded-md bg-off-white px-3 py-1.5 text-primary-blue font-sans placeholder:text-gray-400 focus:outline-2  focus:outline-primary-blue text-md h-12"
+                  className="block w-full rounded-md bg-off-white px-3 py-1.5 text-primary-blue font-sans placeholder:text-gray-400 focus:outline-2  focus:outline-primary-blue text-xl h-12"
                 />
               </div>
             </div>
@@ -132,7 +132,7 @@ export default function AccountPage() {
                   required
                   value={formData.code}
                   onChange={handleInputChange}
-                  className="block w-full rounded-md bg-off-white px-3 py-1.5 text-primary-blue font-sans placeholder:text-gray-400 focus:outline-2  focus:outline-primary-blue text-md h-12"
+                  className="block w-full rounded-md bg-off-white px-3 py-1.5 text-primary-blue font-sans placeholder:text-gray-400 focus:outline-2  focus:outline-primary-blue text-xl h-12"
                 />
               </div>
             </div>
