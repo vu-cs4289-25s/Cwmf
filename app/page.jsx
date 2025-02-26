@@ -6,6 +6,7 @@ import { id, i, init, InstaQLEntity } from "@instantdb/react";
 import { useRouter } from "next/navigation";
 import { join } from "path";
 import { useEffect } from "react";
+import { TypingAnimation } from "src/components/magicui/typing-animation";
 
 // ID for app: cwmf
 const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
@@ -38,40 +39,28 @@ function LandingPage() {
   }
 
   return (
-    <div className="h-screen">
-      <header className="bg-white">
-        <nav
-          aria-label="Global"
-          className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8 h-10"
-        >
-          <div className="flex lg:flex-1"></div>
-          <div className="flex flex-row">
-            <div className="lg:flex lg:flex-1 lg:justify-end px-5">
-              <a href="#" className="text-sm/6 font-semibold text-gray-900">
-                Account
-              </a>
-            </div>
-          </div>
-        </nav>
-      </header>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-full">
+    <div className="h-screen bg-background-blue">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-screen">
         <div className="mx-auto max-w-3xl flex h-full">
           <div className="w-full m-auto justify-center items-center flex flex-col">
-            <h1 className="text-center text-8xl py-5">CWMF</h1>
-            <Link className="w-full" href="/join">
+            <h1 className="text-center text-8xl py-3 text-primary-blue font-sans">cwmf</h1>
+            <div className="mb-10 h-14">
+            <TypingAnimation className="font-sans text-primary-blue text-4xl" duration="200" delay="200">cool word mind fun...</TypingAnimation>
+            </div>
+            <Link href="/join">
               <button
                 type="button"
-                className="w-full rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 h-12 w-md mb-4"
+                className="w-72 rounded-md bg-primary-blue px-3.5 py-2.5 text-2xl font-semibold font-sans text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 h-16 mb-4 tracking-wide"
               >
-                Join Game
+                join game
               </button>
             </Link>
             <button
               type="button"
-              className="w-full rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 h-12 w-md"
+              className="w-72 rounded-md bg-primary-blue px-3.5 py-2.5 text-2xl font-semibold font-sans text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 h-16 tracking-wide"
               onClick={() => createGame()}
             >
-              Create Game
+              create game
             </button>
           </div>
         </div>
