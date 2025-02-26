@@ -25,9 +25,9 @@ export default function WaitingStage(props) {
 
       {/* Show submitted answer */}
       <div className="flex h-full justify-center mt-8">
-        <div className="bg-off-white rounded-lg p-6 max-w-md w-full h-16 mx-4">
-          <h3 className="text-lg text-gray-600 mb-2 font-sans">Your answer:</h3>
-          <p className="text-2xl font-semibold font-sans text-primary-blue">
+        <div className="bg-off-white rounded-lg p-6 max-w-md w-full h-16 mx-4 flex flex-row items-center justify-between">
+          <h3 className="text-xl text-gray-600 font-sans">Your answer:</h3>
+          <p className="text-2xl font-semibold font-sans text-primary-blue px-2">
             {props.submittedAnswer}
           </p>
         </div>

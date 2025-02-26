@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 
-export default function GamePage(props) {
+export default function GameStage(props) {
   const [answer, setAnswer] = useState("");
   const [submittedAnswer, setSubmittedAnswer] = useState("");
   const params = useParams();
@@ -26,10 +26,10 @@ export default function GamePage(props) {
       const playerId = localStorage.getItem("UUID"); // Get the player's UUID
 
       // Save the answer to localStorage for the current round
-      localStorage.setItem(`answer_${gameId}_${props.currentRound}`, answerText);
-
-      const response = await fetch('/api/submitAnswer', {
-        method: 'POST',
+      localStorage.setItem(
+        `answer_${gameId}_${props.currentRound}`,
+        answerText
+      );
 
       const response = await fetch("/api/submitAnswer", {
         method: "POST",

@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function PrepPage(props) {
+export default function PrepStage(props) {
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
