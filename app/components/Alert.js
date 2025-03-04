@@ -2,13 +2,18 @@
 import { useState, useEffect } from 'react';
 
 export default function Alert({ message, subtitle, duration = 2000, onDismiss }) {
+    // No local state - completely controlled by parent
+
     useEffect(() => {
+        // Simply call onDismiss after duration
         const timer = setTimeout(() => {
-            if (onDismiss) onDismiss();
+            if (onDismiss) {
+                onDismiss();
+            }
         }, duration);
 
         return () => clearTimeout(timer);
-    }, [duration, onDismiss]);
+    }, []);  // Empty dependency array - run only once when mounted
 
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">

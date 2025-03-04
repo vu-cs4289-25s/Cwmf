@@ -9,6 +9,7 @@ import GameStage from "../stages/GameStage";
 import WaitingStage from "../stages/WaitingStage";
 import VotingStage from "../stages/VotingStage";
 import ResultsStage from "../stages/ResultsStage";
+import { getAcronym } from "../../../../utils/acronymGenerator";
 
 const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
 const db = init({ appId: APP_ID });
@@ -18,6 +19,7 @@ export default function PlayPage() {
   const params = useParams();
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [localTimeLeft, setLocalTimeLeft] = useState(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Subscribe to game state
   const { data } = db.useQuery({
@@ -48,7 +50,7 @@ export default function PlayPage() {
       setLocalTimeLeft(timeLeft);
 
       // If timer has reached 0, handle stage completion
-      if (timeLeft === 0 && game.isTimerRunning) {
+      if (timeLeft === 0 && game.isTimerRunning && !isTransitioning) {
         handleStageComplete();
         clearInterval(interval);
       }
@@ -58,7 +60,7 @@ export default function PlayPage() {
     setLocalTimeLeft(calculateTimeLeft());
 
     return () => clearInterval(interval);
-  }, [game?.timerStart, game?.timeLeft, game?.isTimerRunning]);
+  }, [game?.timerStart, game?.timeLeft, game?.isTimerRunning, isTransitioning]);
 
   // Reset submission state when entering game stage
   useEffect(() => {
@@ -67,6 +69,27 @@ export default function PlayPage() {
     }
   }, [game?.currentStage]);
 
+  // On mount, generate a next round ID if it doesn't exist
+  useEffect(() => {
+    const generateNextRoundId = async () => {
+      if (data?.games?.length > 0) {
+        const game = data.games[0];
+        // Only generate if we don't already have a nextRoundId
+        if (!game.nextRoundId) {
+          const newRoundId = instantID();
+          await db.transact(
+            db.tx.games[game.id].update({
+              nextRoundId: newRoundId
+            })
+          );
+        }
+      }
+    };
+
+    generateNextRoundId();
+  }, [data?.games]);
+
+  // Handle redirects
   useEffect(() => {
     if (data?.games?.length > 0) {
       const game = data.games[0];
@@ -85,68 +108,74 @@ export default function PlayPage() {
     }
   }, [data, router]);
 
-  // In play/page.js, modify the handleStageComplete function
   const handleStageComplete = async () => {
-    if (!game) return;
+    if (!game || isTransitioning) return;
 
-    const nextStage = getNextStage(game.currentStage);
-    const nextDuration = getStageDuration(nextStage);
+    setIsTransitioning(true);
 
-    // Check if we're transitioning from RESULTS to PREP (new round)
-    if (game.currentStage === "RESULTS" && nextStage === "PREP") {
-      // Create a new round
-      const newRoundId = instantID(); // You'll need to import this from @instantdb/admin
-      const nextRoundNumber = (game.currentRound || 1) + 1;
+    try {
+      const nextStage = getNextStage(game.currentStage);
+      const nextDuration = getStageDuration(nextStage);
 
-      await db.transact([
-        // Create the new round
-        db.tx.round[newRoundId].update({
-          id: newRoundId,
-          gameId: game.id,
-          roundNumber: nextRoundNumber,
-          answers: [],
-          submittedPlayers: [],
-          votes: [],
-          theme: game.theme || "Things a pirate would say",
-          prompt: game.prompt || "BBL", // You might want to update the prompt for each round
-        }),
+      // Check if we're transitioning from RESULTS to PREP (new round)
+      if (game.currentStage === "RESULTS" && nextStage === "PREP") {
+        // Generate a new acronym for the new round
+        const newAcronym = getAcronym('pronounceable');
+        const nextRoundNumber = (game.currentRound || 1) + 1;
+        const currentNextRoundId = game.nextRoundId;
 
-        // Link the new round to the game
-        db.tx.games[game.id].link({
-          roundData: newRoundId,
-        }),
+        // Generate a new nextRoundId for the future round
+        const futureRoundId = instantID();
 
-        // Update game state for the new round
-        db.tx.games[game.id].update({
-          currentStage: nextStage,
-          timerStart: Date.now(),
-          timeLeft: nextDuration,
-          isTimerRunning: true,
-          currentRound: nextRoundNumber,
-          answers: [], // Reset answers for the new round
-          submittedPlayers: [], // Reset submitted players
-        }),
-      ]);
+        await db.transact([
+          // Create the new round
+          db.tx.round[currentNextRoundId].update({
+            id: currentNextRoundId,
+            gameId: game.id,
+            roundNumber: nextRoundNumber,
+            answers: [],
+            submittedPlayers: [],
+            votes: [],
+            theme: game.theme || "Things a pirate would say",
+            prompt: newAcronym,
+          }),
 
-      // Redirect all players to the game with new roundId
-      // This is important to update the URL with the new round ID
-      await db.transact(
-        db.tx.games[game.id].update({
-          shouldRedirect: true,
-          redirectTo: `/game/${params.id}/play/${newRoundId}`,
-        })
-      );
+          // Link the new round to the game
+          db.tx.games[game.id].link({
+            roundData: currentNextRoundId,
+          }),
 
-    } else {
-      // For other stage transitions, just update the game state
-      await db.transact(
-        db.tx.games[game.id].update({
-          currentStage: nextStage,
-          timerStart: Date.now(),
-          timeLeft: nextDuration,
-          isTimerRunning: true,
-        })
-      );
+          // Update game state for the new round and set the future nextRoundId
+          db.tx.games[game.id].update({
+            currentStage: nextStage,
+            timerStart: Date.now(),
+            timeLeft: nextDuration,
+            isTimerRunning: true,
+            currentRound: nextRoundNumber,
+            answers: [],
+            submittedPlayers: [],
+            prompt: newAcronym,
+            nextRoundId: futureRoundId,
+            shouldRedirect: true,
+            redirectTo: `/game/${params.id}/play/${currentNextRoundId}`,
+          }),
+        ]);
+
+      } else {
+        // For other stage transitions, just update the game state
+        await db.transact(
+          db.tx.games[game.id].update({
+            currentStage: nextStage,
+            timerStart: Date.now(),
+            timeLeft: nextDuration,
+            isTimerRunning: true,
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Error in handleStageComplete:", error);
+    } finally {
+      setIsTransitioning(false);
     }
   };
 
