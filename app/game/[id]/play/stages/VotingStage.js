@@ -42,7 +42,6 @@ export default function VotingStage(props) {
       const localUser = localStorage.getItem("userName");
 
       let voteData = {
-        gameCode: gameCode,
         voter: localUser,
         votedFor: vote.playerId,
         roundId: roundId,

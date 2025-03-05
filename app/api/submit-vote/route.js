@@ -9,13 +9,7 @@ const db = init({
 export async function POST(request, { params }) {
   const { voteData } = await request.json();
 
-  console.log("Vote data:", voteData);
-  if (
-    !voteData ||
-    !voteData.gameCode ||
-    !voteData.voter ||
-    !voteData.votedFor
-  ) {
+  if (!voteData || !voteData.roundId || !voteData.voter || !voteData.votedFor) {
     return NextResponse.json({ error: "Invalid vote data" }, { status: 400 });
   }
 
@@ -45,14 +39,14 @@ export async function POST(request, { params }) {
     const player = data?.users[0];
 
     let vote = {
-      voter: voteData.voter,
-      votedFor: player.userName,
+      voter: voteData?.voter,
+      votedFor: player?.userName,
     };
 
     console.log("Vote:", vote);
 
     await db.transact(
-      db.tx.round[voteData.roundId].update({
+      db.tx.round[voteData?.roundId].update({
         votes: [...roundVotes, vote],
       })
     );
