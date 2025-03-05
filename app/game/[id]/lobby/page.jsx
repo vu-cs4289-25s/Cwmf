@@ -180,8 +180,7 @@ export default function LobbyPage() {
         </div>
 
         <div className="flex flex-col items-center gap-8">
-          <div className="flex flex-wrap gap-8 justify-center max-w-md">
-            <ul>
+            <ul className="grid grid-cols-4 gap-8">
               {gameData?.players &&
                 typeof gameData.players === "object" &&
                 Object.entries(gameData?.players).map(([playerId, player]) => (
@@ -201,7 +200,6 @@ export default function LobbyPage() {
             </ul>
           </div>
         </div>
-      </div>
     </div>
   );
 }
