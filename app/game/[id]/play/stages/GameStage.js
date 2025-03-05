@@ -70,6 +70,8 @@ export default function GameStage(props) {
   };
 
   function validateAnswer() {
+    let okCount = 0;
+
     for (let i = 0; i < promptLetters.length; i++) {
       const word = answerWords[i];
       if (word === "") {
@@ -82,9 +84,11 @@ export default function GameStage(props) {
         setAnswerErrorMsg("Word must start with corresponding letter.");
         break;
       } else {
-        return true;
+        okCount++;
       }
     }
+
+    return okCount === promptLetters.length;
   }
 
   const handleSubmit = (e) => {
