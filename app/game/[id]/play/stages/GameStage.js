@@ -30,10 +30,10 @@ export default function GameStage(props) {
 
   // Handle timer reaching zero - move directly to voting if no submission
   useEffect(() => {
-    if (props.timeLeft === 0 && !answer) {
+    if (props.timeLeft === 0) {
       handleSubmitAnswer(""); // Empty submission
     }
-  }, [props.timeLeft, answer]);
+  }, [props.timeLeft]);
 
   const handleSubmitAnswer = async (answerText) => {
     try {
@@ -96,12 +96,10 @@ export default function GameStage(props) {
         buildAnswer += ` ${word}`;
       }
 
-      setAnswer(buildAnswer);
-    }
-
-    if (answer.trim()) {
-      handleSubmitAnswer(answer);
-      setAnswer(""); // Clear the input
+      if (buildAnswer.trim()) {
+        handleSubmitAnswer(buildAnswer);
+        setAnswerWords([]); // Clear the input
+      }
     }
   };
 
