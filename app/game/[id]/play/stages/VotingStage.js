@@ -2,11 +2,20 @@
 import React, { useState, useEffect } from "react";
 import Alert from "../../../../components/Alert";
 import { useParams } from "next/navigation";
+import { init } from "@instantdb/react";
+
+const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
+const db = init({ appId: APP_ID });
 
 export default function VotingStage(props) {
   const params = useParams();
-  const [vote, setVote] = useState("");
-  const [showNoSubmissionAlert, setShowNoSubmissionAlert] = useState(props.showNoSubmissionAlert);
+  const gameCode = params.id;
+  const [vote, setVote] = useState(null);
+  const [hasVoted, setHasVoted] = useState(false);
+  const [showAlert, setShowAlert] = useState(true);
+  const [showNoSubmissionAlert, setShowNoSubmissionAlert] = useState(
+    props.showNoSubmissionAlert
+  );
   const [submissions, setSubmissions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const roundId = params.roundId;
@@ -26,6 +35,31 @@ export default function VotingStage(props) {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const handleVote = async (vote) => {
+    try {
+      console.log("Submitting vote:", vote);
+
+      const localUser = localStorage.getItem("userName");
+
+      let voteData = {
+        voter: localUser,
+        votedFor: vote.playerId,
+        roundId: roundId,
+      };
+      console.log(voteData);
+
+      await fetch("/api/submit-vote", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ voteData }),
+      });
+    } catch (error) {
+      console.error("Error submitting vote:", error);
+    }
+  };
+
   // Fetch round data with submissions when the component mounts
   useEffect(() => {
     const fetchRoundData = async () => {
@@ -34,14 +68,14 @@ export default function VotingStage(props) {
         const response = await fetch(`/api/get-round-data/?roundId=${roundId}`);
 
         if (!response.ok) {
-          throw new Error('Failed to fetch round data');
+          throw new Error("Failed to fetch round data");
         }
 
         const data = await response.json();
         const roundSubmissions = data[0]?.submissions || [];
         setSubmissions(roundSubmissions);
       } catch (error) {
-        console.error('Error fetching round data:', error);
+        console.error("Error fetching round data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -50,9 +84,13 @@ export default function VotingStage(props) {
     fetchRoundData();
   }, [roundId]);
 
+  // Handle vote submission when time is up
+  // This effect will run when the timeLeft prop changes
+  // and if the timeLeft is 0, it will call handleVote with the selected vote
+
   useEffect(() => {
     if (props.timeLeft === 0 && vote) {
-      props.handleVote(vote);
+      console.log("Submitting vote:", vote);
     }
   }, [props.timeLeft, vote, props]);
 
@@ -96,10 +134,11 @@ export default function VotingStage(props) {
           {submissions.length > 0 ? (
             submissions.map((submission, index) => (
               <button
-                onClick={() => setVote(submission.id)}
+                onClick={() => setVote(submission)}
                 key={submission.id || index}
-                className={`${submission.id === vote ? "bg-hover-blue" : "bg-off-white"
-                  } w-3/4 rounded-md p-3 transition-colors`}
+                className={`${
+                  submission.id === vote?.id ? "bg-hover-blue" : "bg-off-white"
+                } w-3/4 rounded-md p-3 transition-colors`}
               >
                 <p className="text-2xl font-sans text-primary-blue">
                   {submission.answer}
@@ -107,9 +146,20 @@ export default function VotingStage(props) {
               </button>
             ))
           ) : (
-            <p className="text-xl text-gray-600 font-sans">
+            <p className="text-xl text-gray-600">
               No submissions for this round yet.
             </p>
+          )}
+          {vote && hasVoted == false && (
+            <button
+              onClick={() => {
+                handleVote(vote);
+                setHasVoted(true);
+              }}
+              className="bg-blue-500 text-white rounded-md p-3 w-1/2 mt-5"
+            >
+              Submit Vote
+            </button>
           )}
         </div>
       )}
