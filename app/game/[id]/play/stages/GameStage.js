@@ -3,7 +3,11 @@ import { useParams } from "next/navigation";
 
 export default function GameStage(props) {
   const [answer, setAnswer] = useState("");
+  const [answerWords, setAnswerWords] = useState([]);
   const [submittedAnswer, setSubmittedAnswer] = useState("");
+  const [promptLetters, setPromptLetters] = useState([]);
+  const [answerErrorMsg, setAnswerErrorMsg] = useState("");
+
   const params = useParams();
   const gameId = params.id;
   const roundId = params.roundId;
@@ -14,12 +18,22 @@ export default function GameStage(props) {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  useEffect(() => {
+    setPromptLetters(props.prompt.split(""));
+
+    let initialAnswerWords = [];
+    for (let i = 0; i < props.prompt.length; i++) {
+      initialAnswerWords.push("");
+    }
+    setAnswerWords(initialAnswerWords);
+  }, []);
+
   // Handle timer reaching zero - move directly to voting if no submission
   useEffect(() => {
-    if (props.timeLeft === 0 && !answer) {
+    if (props.timeLeft === 0) {
       handleSubmitAnswer(""); // Empty submission
     }
-  }, [props.timeLeft, answer]);
+  }, [props.timeLeft]);
 
   const handleSubmitAnswer = async (answerText) => {
     try {
@@ -55,11 +69,37 @@ export default function GameStage(props) {
     }
   };
 
+  function validateAnswer() {
+    for (let i = 0; i < promptLetters.length; i++) {
+      const word = answerWords[i];
+      if (word === "") {
+        setAnswerErrorMsg("All words must be filled.");
+        break;
+      } else if (!/^[a-zA-Z]+$/.test(word)) {
+        setAnswerErrorMsg("Answers may only contain letters.");
+        break;
+      } else if (!word.toUpperCase().startsWith(promptLetters[i])) {
+        setAnswerErrorMsg("Word must start with corresponding letter.");
+        break;
+      } else {
+        return true;
+      }
+    }
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (answer.trim()) {
-      handleSubmitAnswer(answer);
-      setAnswer(""); // Clear the input
+    if (validateAnswer()) {
+      let buildAnswer = "";
+
+      for (const word of answerWords) {
+        buildAnswer += ` ${word}`;
+      }
+
+      if (buildAnswer.trim()) {
+        handleSubmitAnswer(buildAnswer);
+        setAnswerWords([]); // Clear the input
+      }
     }
   };
 
@@ -74,7 +114,7 @@ export default function GameStage(props) {
         </h3>
       </div>
       <div className="text-center h-full flex items-center justify-center flex-col">
-        <h1 className="text-center text-9xl py-5 font-sans text-primary-blue">
+        <h1 className="text-center text-9xl mb-24 py-5 font-sans text-primary-blue">
           {props.prompt}
         </h1>
         {submittedAnswer ? (
@@ -85,15 +125,34 @@ export default function GameStage(props) {
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="flex flex-col items-center w-1/3 mt-8"
+            className="flex flex-col items-center w-5/12 mt-8"
           >
-            <input
-              type="text"
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              className="block w-full rounded-md bg-off-white px-3 py-1.5 text-primary-blue font-sans placeholder:text-gray-600 placeholder:font-sans focus:outline-2  focus:outline-primary-blue text-xl h-12"
-              placeholder="Type your answer..."
-            />
+            <div className="flex flex-col gap-y-5 w-full items-center mb-10">
+              {promptLetters.map((letter, index) => {
+                return (
+                  <div key={index} className="flex flex-row w-full">
+                    <p className="font-sans text-5xl text-primary-blue mr-6">
+                      {letter}
+                    </p>
+                    <input
+                      className="block w-full rounded-md bg-off-white px-3 py-1.5 text-primary-blue font-sans placeholder:text-gray-500 placeholder:font-sans focus:outline-2  focus:outline-primary-blue text-xl h-12"
+                      onChange={(e) => {
+                        setAnswerErrorMsg("");
+                        let words = [...answerWords];
+                        words[index] = e.target.value.trim();
+                        setAnswerWords(words);
+                      }}
+                      placeholder={
+                        "Enter a word that begins with " + letter + "..."
+                      }
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            {answerErrorMsg && (
+              <p className="text-red-700 font-sans text-xl">{answerErrorMsg}</p>
+            )}
             <button
               type="submit"
               className="mt-4 px-6 py-2 w-full rounded-md bg-primary-blue text-2xl font-semibold font-sans text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 h-16 tracking-wide"
