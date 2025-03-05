@@ -138,7 +138,7 @@ export default function VotingStage(props) {
                 onClick={() => setVote(submission)}
                 key={submission.id || index}
                 className={`${
-                  submission.id === vote.id ? "bg-hover-blue" : "bg-off-white"
+                  submission.id === vote?.id ? "bg-hover-blue" : "bg-off-white"
                 } w-3/4 rounded-md p-3 transition-colors`}
               >
                 <p className="text-2xl font-sans text-primary-blue">
