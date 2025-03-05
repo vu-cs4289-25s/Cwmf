@@ -40,6 +40,7 @@ export async function GET(request) {
         }
 
         const gameId = gameIdData.games[0].id;
+        const playersData = gameIdData.games[0].players;
 
         // Query rounds with this game ID
         const votesQuery = {
@@ -66,9 +67,14 @@ export async function GET(request) {
         // Create a hashmap to count votes for each player
         const voteCountMap = {};
         
-        // Initialize with 0 for all voters
+        // Initialize with 0 for all players in the game
+        playersData.forEach(player => {
+            voteCountMap[player.name] = 0;
+        });
+        
+        // Initialize with 0 for any voters not in players list
         allVotes.forEach(vote => {
-            if (!voteCountMap[vote.voter]) {
+            if (!voteCountMap.hasOwnProperty(vote.voter)) {
                 voteCountMap[vote.voter] = 0;
             }
         });
