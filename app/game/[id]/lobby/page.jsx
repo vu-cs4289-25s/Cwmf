@@ -6,6 +6,7 @@ import { init } from "@instantdb/react";
 import { id as instantID } from "@instantdb/admin";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { getAcronym } from "../../../utils/acronymGenerator";
 
 const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
 const db = init({ appId: APP_ID });
@@ -72,6 +73,9 @@ export default function LobbyPage() {
     if (!gameData) return;
 
     try {
+      // Generate the first acronym
+      const firstAcronym = getAcronym("pronounceable");
+
       // Create the first round
       const firstRoundId = instantID();
       await db.transact([
@@ -84,7 +88,7 @@ export default function LobbyPage() {
           submittedPlayers: [],
           votes: [],
           theme: "Things a pirate would say",
-          prompt: "BBL",
+          prompt: firstAcronym,
         }),
         db.tx.games[gameData.id].link({
           roundData: firstRoundId,
@@ -100,7 +104,7 @@ export default function LobbyPage() {
           answers: [],
           scores: {},
           theme: "Things a pirate would say",
-          prompt: "BBL",
+          prompt: firstAcronym,
         }),
       ]);
 
@@ -125,21 +129,33 @@ export default function LobbyPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background-blue">
       <div className="text-center pt-8 pb-0">
-        <h1 className="text-center text-8xl py-5 text-primary-blue font-sans">cwmf</h1>
-        <h3 className="text-2xl font-sans text-primary-blue">game code: {id}</h3>
+        <h1 className="text-center text-8xl py-5 text-primary-blue font-sans">
+          cwmf
+        </h1>
+        <h3 className="text-2xl font-sans text-primary-blue">
+          game code: {id}
+        </h3>
       </div>
 
       <div className="flex flex-1 justify-center items-center gap-20 px-8 -mt-80">
         <div className="bg-off-white shadow-lg rounded-lg p-6 w-80">
-          <h2 className="text-xl font-semibold mb-4 text-center font-sans tracking-wide text-primary-blue">game settings</h2>
+          <h2 className="text-xl font-semibold mb-4 text-center font-sans tracking-wide text-primary-blue">
+            game settings
+          </h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-primary-blue mb-2 font-sans">round time</label>
+              <label className="block text-primary-blue mb-2 font-sans">
+                round time
+              </label>
               <p className="font-sans text-gray-600">30 seconds</p>
             </div>
             <div>
-              <label className="block text-primary-blue font-sans mb-2">theme</label>
-              <p className="font-sans text-gray-600">things a pirate would say</p>
+              <label className="block text-primary-blue font-sans mb-2">
+                theme
+              </label>
+              <p className="font-sans text-gray-600">
+                things a pirate would say
+              </p>
             </div>
             <div className="flex gap-4">
               {userData?.host === "true" && (
@@ -172,9 +188,13 @@ export default function LobbyPage() {
                   <span key={playerId}>
                     <div className="flex flex-col items-center">
                       <div className="inline-flex items-center justify-center size-16 rounded-full ring-2 ring-off-white bg-primary-blue text-off-white mt-4">
-                        <span className="text-lg font-sans font-bold">{player.name[0].toUpperCase()}</span>
+                        <span className="text-lg font-sans font-bold">
+                          {player.name[0].toUpperCase()}
+                        </span>
                       </div>
-                      <span className="mt-2 font-sans text-primary-blue">{player.name}</span>
+                      <span className="mt-2 font-sans text-primary-blue">
+                        {player.name}
+                      </span>
                     </div>
                   </span>
                 ))}
