@@ -12,6 +12,7 @@ export async function GET(request) {
         // GET requests shouldn't have bodies, use URL parameters instead
         const { searchParams } = new URL(request.url);
         const gameCode = searchParams.get('gameCode');
+        const roundId = searchParams.get('roundId'); // Get optional roundId parameter
 
         // Validate required fields
         if (!gameCode) {
@@ -61,37 +62,77 @@ export async function GET(request) {
             );
         }
 
-        // Return the votes data
-        const allVotes = votesData.round.flatMap(round => round.votes || []);
+        // Get all votes across all rounds
+        const allRounds = votesData.round;
+        const allVotes = allRounds.flatMap(round => round.votes || []);
         
-        // Create a hashmap to count votes for each player
-        const voteCountMap = {};
+        // Create a hashmap to count total votes for each player
+        const totalVoteCountMap = {};
         
         // Initialize with 0 for all players in the game
         playersData.forEach(player => {
-            voteCountMap[player.name] = 0;
+            totalVoteCountMap[player.name] = 0;
         });
         
         // Initialize with 0 for any voters not in players list
         allVotes.forEach(vote => {
-            if (!voteCountMap.hasOwnProperty(vote.voter)) {
-                voteCountMap[vote.voter] = 0;
+            if (!totalVoteCountMap.hasOwnProperty(vote.voter)) {
+                totalVoteCountMap[vote.voter] = 0;
             }
         });
         
-        // Count votes
+        // Count total votes
         allVotes.forEach(vote => {
-            if (voteCountMap.hasOwnProperty(vote.votedFor)) {
-                voteCountMap[vote.votedFor] += 1;
+            if (totalVoteCountMap.hasOwnProperty(vote.votedFor)) {
+                totalVoteCountMap[vote.votedFor] += 1;
             } else {
-                voteCountMap[vote.votedFor] = 1;
+                totalVoteCountMap[vote.votedFor] = 1;
             }
         });
         
-        return NextResponse.json({ 
-            votes: allVotes,
-            voteCounts: voteCountMap
-        });
+        // Prepare response
+        const response = {
+            totalVotes: allVotes,
+            totalVoteCounts: totalVoteCountMap
+        };
+        
+        // If roundId is specified, add round-specific data
+        if (roundId) {
+            const specificRound = allRounds.find(round => round.id === roundId);
+            
+            if (!specificRound) {
+                return NextResponse.json(
+                    { error: 'Round not found' },
+                    { status: 404 }
+                );
+            }
+            
+            const roundVotes = specificRound.votes || [];
+            
+            // Create a hashmap to count round-specific votes
+            const roundVoteCountMap = {};
+            
+            // Initialize with 0 for all players in the game
+            playersData.forEach(player => {
+                roundVoteCountMap[player.name] = 0;
+            });
+            
+            // Count round-specific votes
+            roundVotes.forEach(vote => {
+                if (roundVoteCountMap.hasOwnProperty(vote.votedFor)) {
+                    roundVoteCountMap[vote.votedFor] += 1;
+                } else {
+                    roundVoteCountMap[vote.votedFor] = 1;
+                }
+            });
+            
+            // Add round-specific data to response
+            response.roundId = roundId;
+            response.roundVotes = roundVotes;
+            response.roundVoteCounts = roundVoteCountMap;
+        }
+        
+        return NextResponse.json(response);
     } catch (error) {
         console.error('Error querying votes:', error);
         return NextResponse.json(
