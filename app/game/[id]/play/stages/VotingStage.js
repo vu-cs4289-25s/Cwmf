@@ -1,4 +1,4 @@
-// Modified VotingStage.js with explicit alert control
+// Modified VotingStage.js with themed submit button
 import React, { useState, useEffect } from "react";
 import Alert from "../../../../components/Alert";
 import { useParams } from "next/navigation";
@@ -19,15 +19,6 @@ export default function VotingStage(props) {
   const [submissions, setSubmissions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const roundId = params.roundId;
-
-  // Debug to confirm alert behavior
-  useEffect(() => {
-    if (showNoSubmissionAlert) {
-      console.log("Alert is showing, will hide in 2 seconds");
-    } else {
-      console.log("Alert is not showing");
-    }
-  }, [showNoSubmissionAlert]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -87,7 +78,6 @@ export default function VotingStage(props) {
   // Handle vote submission when time is up
   // This effect will run when the timeLeft prop changes
   // and if the timeLeft is 0, it will call handleVote with the selected vote
-
   useEffect(() => {
     if (props.timeLeft === 0 && vote) {
       console.log("Submitting vote:", vote);
@@ -136,9 +126,8 @@ export default function VotingStage(props) {
               <button
                 onClick={() => setVote(submission)}
                 key={submission.id || index}
-                className={`${
-                  submission.id === vote?.id ? "bg-hover-blue" : "bg-off-white"
-                } w-3/4 rounded-md p-3 transition-colors`}
+                className={`${submission.id === vote?.id ? "bg-hover-blue" : "bg-off-white"
+                  } w-3/4 rounded-md p-3 transition-colors`}
               >
                 <p className="text-2xl font-sans text-primary-blue">
                   {submission.answer}
@@ -156,7 +145,7 @@ export default function VotingStage(props) {
                 handleVote(vote);
                 setHasVoted(true);
               }}
-              className="bg-blue-500 text-white rounded-md p-3 w-1/2 mt-5"
+              className="mt-6 px-6 py-3 w-1/2 rounded-md bg-primary-blue text-2xl font-semibold font-sans text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 tracking-wide transition-colors"
             >
               Submit Vote
             </button>
