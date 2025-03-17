@@ -28,13 +28,6 @@ export default function GameStage(props) {
     setAnswerWords(initialAnswerWords);
   }, []);
 
-  // Handle timer reaching zero - move directly to voting if no submission
-  useEffect(() => {
-    if (props.timeLeft === 0) {
-      handleSubmitAnswer(""); // Empty submission
-    }
-  }, [props.timeLeft]);
-
   const handleSubmitAnswer = async (answerText) => {
     try {
       const playerId = localStorage.getItem("UUID"); // Get the player's UUID

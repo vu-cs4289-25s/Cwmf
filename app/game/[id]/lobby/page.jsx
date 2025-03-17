@@ -1,4 +1,4 @@
-//Lobby
+// lobby page
 "use client";
 
 import Link from "next/link";
@@ -19,6 +19,7 @@ export default function LobbyPage() {
 
   const [userData, setUserData] = useState(null);
   const [gameData, setGameData] = useState({});
+  const [maxRounds, setMaxRounds] = useState(2);
 
   const { data, isLoading, error } = db.useQuery({
     games: {
@@ -33,16 +34,20 @@ export default function LobbyPage() {
       const game = data.games[0];
       setGameData(game);
 
+      // Check if current player is the host and restore host status
+      const currentPlayerId = localStorage.getItem("UUID");
+      if (game.hostId === currentPlayerId) {
+        localStorage.setItem("host", "true");
+      }
+
+      // If game has maxRounds set, use that value
+      if (game.maxRounds) {
+        setMaxRounds(game.maxRounds);
+      }
+
       // Handle redirect for all players
       if (game.shouldRedirect && game.redirectTo) {
         router.push(game.redirectTo);
-        // Clear the redirect flag
-        db.transact(
-          db.tx.games[game.id].update({
-            shouldRedirect: false,
-            redirectTo: null,
-          })
-        );
       }
     }
   }, [data, router]);
@@ -68,6 +73,22 @@ export default function LobbyPage() {
       publishPresence({ name: userData.name });
     }
   }, [userData, publishPresence]);
+
+  const handleMaxRoundsChange = (value) => {
+    const newValue = parseInt(value, 10);
+    if (!isNaN(newValue) && newValue > 0) {
+      setMaxRounds(newValue);
+
+      // If user is host, update the game settings
+      if (userData?.host === "true" && gameData?.id) {
+        db.transact(
+          db.tx.games[gameData.id].update({
+            maxRounds: newValue,
+          })
+        );
+      }
+    }
+  };
 
   const startGame = async () => {
     if (!gameData) return;
@@ -105,6 +126,8 @@ export default function LobbyPage() {
           scores: {},
           theme: "Things a pirate would say",
           prompt: firstAcronym,
+          maxRounds: maxRounds,
+          hostId: localStorage.getItem("UUID"), // Store host ID in the game document
         }),
       ]);
 
@@ -156,6 +179,27 @@ export default function LobbyPage() {
               <p className="font-sans text-gray-600">
                 things a pirate would say
               </p>
+            </div>
+            {/* New field for max rounds */}
+            <div>
+              <label className="block text-primary-blue font-sans mb-2">
+                number of rounds
+              </label>
+              {userData?.host === "true" ? (
+                <select
+                  value={maxRounds}
+                  onChange={(e) => handleMaxRoundsChange(e.target.value)}
+                  className="w-full px-2 py-1 rounded border border-gray-300 font-sans text-gray-700"
+                >
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                    <option key={num} value={num}>
+                      {num}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <p className="font-sans text-gray-600">{maxRounds}</p>
+              )}
             </div>
             <div className="flex gap-4">
               {userData?.host === "true" && (

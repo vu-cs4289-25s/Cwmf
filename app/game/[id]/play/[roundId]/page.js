@@ -9,7 +9,9 @@ import GameStage from "../stages/GameStage";
 import WaitingStage from "../stages/WaitingStage";
 import VotingStage from "../stages/VotingStage";
 import ResultsStage from "../stages/ResultsStage";
+import GameOverStage from "../stages/GameOverStage";
 import { getAcronym } from "../../../../utils/acronymGenerator";
+import LobbyPage from "../../lobby/page";
 
 const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
 const db = init({ appId: APP_ID });
@@ -40,6 +42,27 @@ export default function PlayPage() {
     const elapsed = Math.floor((now - game.timerStart) / 1000);
     return Math.max(0, game.timeLeft - elapsed);
   };
+
+  // Add this new effect near the top of your component
+  useEffect(() => {
+    // When this component mounts, if we have game data, clear the redirect flags
+    if (data?.games?.length > 0) {
+      const game = data.games[0];
+
+      // Only need to do this once - check if this is a new arrival
+      if (game.shouldRedirect && game.redirectTo) {
+        // Only have one player (ideally the host) clear these flags
+        if (localStorage.getItem("host") === "true") {
+          db.transact(
+            db.tx.games[game.id].update({
+              shouldRedirect: false,
+              redirectTo: null,
+            })
+          );
+        }
+      }
+    }
+  }, [data]); // Run when data changes and we have game data
 
   // Update local timer every second and check for stage completion
   useEffect(() => {
@@ -97,13 +120,6 @@ export default function PlayPage() {
       // Handle redirect for all players
       if (game.shouldRedirect && game.redirectTo) {
         router.push(game.redirectTo);
-        // Clear the redirect flag
-        db.transact(
-          db.tx.games[game.id].update({
-            shouldRedirect: false,
-            redirectTo: null,
-          })
-        );
       }
     }
   }, [data, router]);
@@ -118,49 +134,68 @@ export default function PlayPage() {
       const nextDuration = getStageDuration(nextStage);
 
       // Check if we're transitioning from RESULTS to PREP (new round)
-      if (game.currentStage === "RESULTS" && nextStage === "PREP") {
-        // Generate a new acronym for the new round
-        const newAcronym = getAcronym('pronounceable');
+      if (game.currentStage === "RESULTS") {
         const nextRoundNumber = (game.currentRound || 1) + 1;
-        const currentNextRoundId = game.nextRoundId;
 
-        // Generate a new nextRoundId for the future round
-        const futureRoundId = instantID();
+        // Check if we've reached the maximum number of rounds
+        if (nextRoundNumber > (game.maxRounds || 3)) {
+          // Game is over, show game over screen but don't redirect yet
+          // The GameOverStage component will handle the redirect after 10 seconds
+          // Make sure to preserve the hostId
+          await db.transact(
+            db.tx.games[game.id].update({
+              currentStage: "GAME_OVER",
+              isTimerRunning: false,
+              shouldRedirect: false,
+              redirectPath: `/game/${params.id}/lobby`,
+              // Make sure hostId is preserved
+              hostId: game.hostId || localStorage.getItem("UUID")
+            })
+          );
+        } else {
+          // Continue to next round
+          const currentNextRoundId = game.nextRoundId;
+          // Generate a new nextRoundId for the future round
+          const futureRoundId = instantID();
+          // Generate a new acronym for the new round
+          const newAcronym = getAcronym('pronounceable');
 
-        await db.transact([
-          // Create the new round
-          db.tx.round[currentNextRoundId].update({
-            id: currentNextRoundId,
-            gameId: game.id,
-            roundNumber: nextRoundNumber,
-            answers: [],
-            submittedPlayers: [],
-            votes: [],
-            theme: game.theme || "Things a pirate would say",
-            prompt: newAcronym,
-          }),
+          await db.transact([
+            // Create the new round
+            db.tx.round[currentNextRoundId].update({
+              id: currentNextRoundId,
+              gameId: game.id,
+              roundNumber: nextRoundNumber,
+              answers: [],
+              submittedPlayers: [],
+              votes: [],
+              theme: game.theme || "Things a pirate would say",
+              prompt: newAcronym,
+            }),
 
-          // Link the new round to the game
-          db.tx.games[game.id].link({
-            roundData: currentNextRoundId,
-          }),
+            // Link the new round to the game
+            db.tx.games[game.id].link({
+              roundData: currentNextRoundId,
+            }),
 
-          // Update game state for the new round and set the future nextRoundId
-          db.tx.games[game.id].update({
-            currentStage: nextStage,
-            timerStart: Date.now(),
-            timeLeft: nextDuration,
-            isTimerRunning: true,
-            currentRound: nextRoundNumber,
-            answers: [],
-            submittedPlayers: [],
-            prompt: newAcronym,
-            nextRoundId: futureRoundId,
-            shouldRedirect: true,
-            redirectTo: `/game/${params.id}/play/${currentNextRoundId}`,
-          }),
-        ]);
-
+            // Update game state for the new round and set the future nextRoundId
+            db.tx.games[game.id].update({
+              currentStage: nextStage,
+              timerStart: Date.now(),
+              timeLeft: nextDuration,
+              isTimerRunning: true,
+              currentRound: nextRoundNumber,
+              answers: [],
+              submittedPlayers: [],
+              prompt: newAcronym,
+              nextRoundId: futureRoundId,
+              shouldRedirect: true,
+              redirectTo: `/game/${params.id}/play/${currentNextRoundId}`,
+              // Preserve host ID when moving to next round
+              hostId: game.hostId
+            }),
+          ]);
+        }
       } else {
         // For other stage transitions, just update the game state
         await db.transact(
@@ -169,6 +204,8 @@ export default function PlayPage() {
             timerStart: Date.now(),
             timeLeft: nextDuration,
             isTimerRunning: true,
+            // Preserve host ID during normal stage transitions
+            hostId: game.hostId
           })
         );
       }
@@ -264,6 +301,14 @@ export default function PlayPage() {
             {...commonProps}
             answers={game.answers || []}
             onNext={handleStageComplete}
+          />
+        );
+      case "GAME_OVER":
+        return (
+          <GameOverStage
+            {...commonProps}
+            scores={game.scores || {}}
+            redirectPath={game.redirectPath || `/game/${params.id}/lobby`}
           />
         );
       default:
