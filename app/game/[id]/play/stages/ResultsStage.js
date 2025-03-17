@@ -1,34 +1,52 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 
 export default function ResultsStage(props) {
-  const players = [
-    {
-      username: "big justice",
-      votes: 3,
-    },
-    {
-      username: "grahamcard",
-      votes: 2,
-    },
-    {
-      username: "alex",
-      votes: 1,
-    },
-    {
-      username: "bbllover123",
-      votes: 0,
-    },
-    {
-      username: "sock",
-      votes: 0,
-    },
-  ];
+  const params = useParams();
+  const [voteData, setVoteData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch vote data when component mounts
+  useEffect(() => {
+    const fetchVoteData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`/api/get-votes?gameCode=${params.id}`);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch vote data");
+        }
+
+        const data = await response.json();
+        setVoteData(data);
+      } catch (error) {
+        console.error("Error fetching vote data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchVoteData();
+  }, [params.id]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
+
+  // Create an array of players with their vote counts
+  const getPlayerScores = () => {
+    if (!voteData || !voteData.totalVoteCounts) {
+      return [];
+    }
+
+    return Object.entries(voteData.totalVoteCounts)
+      .map(([username, votes]) => ({ username, votes }))
+      .sort((a, b) => b.votes - a.votes); // Sort by votes in descending order
+  };
+
+  const playerScores = getPlayerScores();
 
   return (
     <div className="flex h-screen flex-col bg-background-blue">
@@ -45,20 +63,38 @@ export default function ResultsStage(props) {
           {props.prompt}
         </h1>
       </div>
-      <div className="flex flex-col mt-10 space-y-5 items-center justify-center">
-        {players.map((player, index) => (
-          <div
-            key={index}
-            className={`bg-off-white w-3/4 rounded-lg p-3 flex flex-row justify-between`}
-          >
-            <p className="font-sans text-2xl text-primary-blue">
-              {player.username}
-            </p>
-            <p className="font-sans text-2xl text-primary-blue">
-              {player.votes}
-            </p>
+
+      <div className="flex flex-col mt-10 space-y-5 items-center justify-center pb-36">
+        {isLoading ? (
+          <div className="flex justify-center items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-blue"></div>
           </div>
-        ))}
+        ) : playerScores.length > 0 ? (
+          playerScores.map((player, index) => (
+            <div
+              key={index}
+              className={`bg-off-white w-3/4 rounded-lg p-3 flex flex-row justify-between ${index === 0 ? 'ring-2 ring-primary-blue' : ''}`}
+            >
+              <p className="font-sans text-2xl text-primary-blue">
+                {player.username}
+              </p>
+              <p className="font-sans text-2xl text-primary-blue">
+                {player.votes}
+              </p>
+            </div>
+          ))
+        ) : (
+          <p className="text-xl text-gray-600">No votes recorded for this round yet.</p>
+        )}
+      </div>
+
+      {/* Fixed bottom section with timer */}
+      <div className="fixed bottom-0 left-0 right-0 bg-off-white">
+        <div className="max-w-md mx-auto flex flex-col items-center p-4">
+          <div className="text-6xl font-bold font-sans text-primary-blue">
+            {formatTime(props.timeLeft)}
+          </div>
+        </div>
       </div>
     </div>
   );
