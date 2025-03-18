@@ -307,7 +307,6 @@ export default function PlayPage() {
         return (
           <GameOverStage
             {...commonProps}
-            scores={game.scores || {}}
             redirectPath={game.redirectPath || `/game/${params.id}/lobby`}
           />
         );
