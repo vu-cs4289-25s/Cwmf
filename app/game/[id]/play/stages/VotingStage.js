@@ -123,16 +123,23 @@ export default function VotingStage(props) {
         <div className="flex flex-col mt-10 space-y-5 items-center justify-center pb-32">
           {submissions.length > 0 ? (
             submissions.map((submission, index) => (
-              <button
-                onClick={() => setVote(submission)}
-                key={submission.id || index}
-                className={`${submission.id === vote?.id ? "bg-hover-blue" : "bg-off-white"
-                  } w-3/4 rounded-md p-3 transition-colors`}
-              >
-                <p className="text-2xl font-sans text-primary-blue">
-                  {submission.answer}
-                </p>
-              </button>
+              <>
+                {submission.playerId !== localStorage.getItem("UUID") && (
+                  <button
+                    onClick={() => setVote(submission)}
+                    key={submission.id || index}
+                    className={`${
+                      submission.id === vote?.id
+                        ? "bg-hover-blue"
+                        : "bg-off-white"
+                    } w-3/4 rounded-md p-3 transition-colors`}
+                  >
+                    <p className="text-2xl font-sans text-primary-blue">
+                      {submission.answer}
+                    </p>
+                  </button>
+                )}
+              </>
             ))
           ) : (
             <p className="text-xl text-gray-600">
