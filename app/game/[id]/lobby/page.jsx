@@ -19,7 +19,17 @@ export default function LobbyPage() {
 
   const [userData, setUserData] = useState(null);
   const [gameData, setGameData] = useState({});
+  const [editing, setEditing] = useState(false);
+
+  // Game settings
+  const [roundTime, setRoundTime] = useState("30 seconds");
+  const [theme, setTheme] = useState("Things a pirate would say");
   const [maxRounds, setMaxRounds] = useState(2);
+
+  // Editing game settings
+  const [editRoundTime, setEditRoundTime] = useState("");
+  const [editTheme, setEditTheme] = useState("");
+  const [editMaxRounds, setEditMaxRounds] = useState(0);
 
   const { data, isLoading, error } = db.useQuery({
     games: {
@@ -62,17 +72,20 @@ export default function LobbyPage() {
     setUserData(user);
   }, []);
 
-  const {
-    user: myPresence,
-    peers,
-    publishPresence,
-  } = db.rooms.usePresence(room);
-
+  // Editing session
   useEffect(() => {
-    if (userData) {
-      publishPresence({ name: userData.name });
+    if (editing) {
+      setEditTheme(theme);
+      setEditRoundTime(roundTime);
+      setEditMaxRounds(maxRounds);
     }
-  }, [userData, publishPresence]);
+
+    if (!editing) {
+      setEditTheme("");
+      setEditRoundTime(0);
+      setEditMaxRounds(0);
+    }
+  }, [editing]);
 
   const handleMaxRoundsChange = (value) => {
     const newValue = parseInt(value, 10);
@@ -89,6 +102,34 @@ export default function LobbyPage() {
       }
     }
   };
+
+  function saveGameSettings() {
+    // setTheme(editTheme);
+    // setRoundTime(editRoundTime);
+    setMaxRounds(editMaxRounds);
+
+    if (userData?.host === "true" && gameData?.id) {
+      db.transact(
+        db.tx.games[gameData.id].update({
+          maxRounds,
+        })
+      );
+    }
+
+    setEditing(false);
+  }
+
+  const {
+    user: myPresence,
+    peers,
+    publishPresence,
+  } = db.rooms.usePresence(room);
+
+  useEffect(() => {
+    if (userData) {
+      publishPresence({ name: userData.name });
+    }
+  }, [userData, publishPresence]);
 
   const startGame = async () => {
     if (!gameData) return;
@@ -170,25 +211,45 @@ export default function LobbyPage() {
               <label className="block text-primary-blue mb-2 font-sans">
                 round time
               </label>
-              <p className="font-sans text-gray-600">30 seconds</p>
+              {userData?.host === "true" && editing ? (
+                <select
+                  value={editRoundTime}
+                  onChange={(e) => setEditRoundTime(e.target.value)}
+                  className="w-full px-2 py-1 rounded border border-gray-300 font-sans text-gray-700"
+                >
+                  {["30 seconds", "1 minute", "2 minutes"].map((duration) => (
+                    <option key={duration} value={duration}>
+                      {duration}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <p className="font-sans text-gray-600">{roundTime}</p>
+              )}
             </div>
             <div>
               <label className="block text-primary-blue font-sans mb-2">
                 theme
               </label>
-              <p className="font-sans text-gray-600">
-                things a pirate would say
-              </p>
+              {userData?.host === "true" && editing ? (
+                <input
+                  value={editTheme}
+                  onChange={(e) => setEditTheme(e.target.value)}
+                  className="w-full px-2 py-1 rounded border border-gray-300 font-sans text-gray-700"
+                />
+              ) : (
+                <p className="font-sans text-gray-600">{theme}</p>
+              )}
             </div>
             {/* New field for max rounds */}
             <div>
               <label className="block text-primary-blue font-sans mb-2">
                 number of rounds
               </label>
-              {userData?.host === "true" ? (
+              {userData?.host === "true" && editing ? (
                 <select
-                  value={maxRounds}
-                  onChange={(e) => handleMaxRoundsChange(e.target.value)}
+                  value={editMaxRounds}
+                  onChange={(e) => setEditMaxRounds(e.target.value)}
                   className="w-full px-2 py-1 rounded border border-gray-300 font-sans text-gray-700"
                 >
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
@@ -201,23 +262,45 @@ export default function LobbyPage() {
                 <p className="font-sans text-gray-600">{maxRounds}</p>
               )}
             </div>
-            <div className="flex gap-4">
+            <div>
               {userData?.host === "true" && (
-                <button
-                  type="button"
-                  className="flex w-full justify-center rounded-md bg-primary-blue px-3 py-1.5 text-sm/6 font-semibold font-sans tracking-wide text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                >
-                  edit
-                </button>
-              )}
-              {userData?.host === "true" && (
-                <button
-                  type="button"
-                  className="flex w-full justify-center rounded-md bg-primary-blue px-3 py-1.5 text-sm/6 font-semibold font-sans tracking-wide text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  onClick={startGame}
-                >
-                  start game
-                </button>
+                <div>
+                  {editing ? (
+                    <div className="flex gap-4">
+                      <button
+                        type="button"
+                        className="flex w-full justify-center rounded-md bg-primary-blue px-3 py-1.5 text-sm/6 font-semibold font-sans tracking-wide text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        onClick={saveGameSettings}
+                      >
+                        save
+                      </button>
+                      <button
+                        type="button"
+                        className="flex w-full justify-center rounded-md bg-primary-blue px-3 py-1.5 text-sm/6 font-semibold font-sans tracking-wide text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        onClick={() => setEditing(false)}
+                      >
+                        cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-4">
+                      <button
+                        type="button"
+                        className="flex w-full justify-center rounded-md bg-primary-blue px-3 py-1.5 text-sm/6 font-semibold font-sans tracking-wide text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        onClick={() => setEditing(true)}
+                      >
+                        edit
+                      </button>
+                      <button
+                        type="button"
+                        className="flex w-full justify-center rounded-md bg-primary-blue px-3 py-1.5 text-sm/6 font-semibold font-sans tracking-wide text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        onClick={startGame}
+                      >
+                        start game
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>
