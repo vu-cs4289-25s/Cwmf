@@ -1,4 +1,5 @@
 import React from "react";
+import Narrator from "../../../../components/Narrator";
 
 export default function PrepStage(props) {
   const formatTime = (seconds) => {
@@ -8,8 +9,8 @@ export default function PrepStage(props) {
   };
 
   return (
-    <div className="flex h-screen bg-background-blue flex-col">
-      <div className="text-center pt-8 pb-0 h-1/12">
+    <div className="flex h-screen flex-col bg-background-blue">
+      <div className="text-center pt-8 pb-0">
         <h1 className="text-center font-sans text-primary-blue text-4xl py-5">
           round {props.currentRound}
         </h1>
@@ -17,20 +18,29 @@ export default function PrepStage(props) {
           theme: {props.theme.toLowerCase()}
         </h3>
       </div>
-      <div className="text-center h-full flex items-center justify-center">
+      <div className="text-center pt-30 pb-0">
         <h1 className="text-center text-9xl py-5 font-sans text-primary-blue">
           {props.prompt}
         </h1>
       </div>
 
-      {/* Timer section */}
-      <div className="justify-self-end w-full p-6 h-36 bg-off-white">
-        <div className="max-w-md mx-auto flex flex-col items-center">
-          <div className="text-6xl font-bold text-primary-blue font-sans">
+      {/* Fixed bottom section with timer */}
+      <div className="fixed bottom-0 left-0 right-0 bg-off-white">
+        <div className="max-w-md mx-auto flex flex-col items-center p-4">
+          <div className="text-6xl font-bold font-sans text-primary-blue">
             {formatTime(props.timeLeft)}
           </div>
         </div>
       </div>
+
+      {/* Add Narrator component */}
+      <Narrator 
+        stage="PREP"
+        currentRound={props.currentRound}
+        theme={props.theme}
+        prompt={props.prompt}
+        timeLeft={props.timeLeft}
+      />
     </div>
   );
 }

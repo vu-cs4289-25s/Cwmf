@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import Narrator from "../../../../components/Narrator";
 
 export default function ResultsStage(props) {
   const params = useParams();
@@ -96,6 +97,16 @@ export default function ResultsStage(props) {
           </div>
         </div>
       </div>
+
+      {/* Add Narrator component */}
+      <Narrator 
+        stage="RESULTS"
+        currentRound={props.currentRound}
+        theme={props.theme}
+        prompt={props.prompt}
+        timeLeft={props.timeLeft}
+        submissions={playerScores}
+      />
     </div>
   );
 }
