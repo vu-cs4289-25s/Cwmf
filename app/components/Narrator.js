@@ -10,13 +10,7 @@ const Narrator = ({ stage, currentRound, theme, prompt, timeLeft, submissions = 
     // Generate roasts based on answer characteristics
     const roasts = [
       // Length-based roasts
-      answer.length < 5 && "Did you forget how to type? Or are you just that lazy? 🤖",
-      answer.length > 50 && "I've seen shorter terms of service! 📜",
       
-      // Content-based roasts
-      answer.toLowerCase().includes('the') && "Using 'the'? Wow, you're really pushing the boundaries of creativity... 🥱",
-      answer.toLowerCase().includes('very') && "Very... very... very basic. I'm detecting a pattern here 🤖",
-      answer.toLowerCase().includes('good') && "Good? That's what you're going with? My training data is from 2021 and even I can do better 😤",
       
       // Savage AI roasts
       "I've seen more creativity in a brick wall's autobiography 🧱",
