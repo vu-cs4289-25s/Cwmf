@@ -11,7 +11,7 @@ const Narrator = ({ stage, currentRound, theme, prompt, timeLeft, submissions = 
     const roasts = [
       // Length-based roasts
       
-      
+
       // Savage AI roasts
       "I've seen more creativity in a brick wall's autobiography 🧱",
       "My neural networks are literally crying right now 😭",
@@ -100,7 +100,7 @@ const Narrator = ({ stage, currentRound, theme, prompt, timeLeft, submissions = 
 
   return (
     <div className="fixed bottom-24 left-0 right-0 z-50">
-      <div className="max-w-md mx-auto bg-off-white rounded-lg shadow-lg p-4 transform transition-all duration-300 hover:scale-105">
+      <div className="max-w-md mx-auto bg-off-white rounded-lg shadow-lg p-4 transform transition-all duration-600 hover:scale-105">
         <div className="flex items-center justify-center space-x-2">
           <span className="text-2xl">🤖</span>
           <p className="text-xl font-sans text-primary-blue font-semibold">
