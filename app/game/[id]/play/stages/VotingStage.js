@@ -1,4 +1,3 @@
-// Modified VotingStage.js with themed submit button
 import React, { useState, useEffect } from "react";
 import Alert from "../../../../components/Alert";
 import Narrator from "../../../../components/Narrator";
@@ -13,7 +12,6 @@ export default function VotingStage(props) {
   const gameCode = params.id;
   const [vote, setVote] = useState(null);
   const [hasVoted, setHasVoted] = useState(false);
-  const [showAlert, setShowAlert] = useState(true);
   const [showNoSubmissionAlert, setShowNoSubmissionAlert] = useState(
     props.showNoSubmissionAlert
   );
@@ -123,25 +121,22 @@ export default function VotingStage(props) {
       ) : (
         <div className="flex flex-col mt-10 space-y-5 items-center justify-center pb-32">
           {submissions.length > 0 ? (
-            submissions.map((submission, index) => (
-              <>
-                {submission.playerId !== localStorage.getItem("UUID") && (
-                  <button
-                    onClick={() => setVote(submission)}
-                    key={submission.id || index}
-                    className={`${
-                      submission.id === vote?.id
-                        ? "bg-hover-blue"
-                        : "bg-off-white"
+            submissions
+              .filter(submission => submission.playerId !== localStorage.getItem("UUID"))
+              .map((submission, index) => (
+                <button
+                  onClick={() => setVote(submission)}
+                  key={submission.id || `submission-${index}`}
+                  className={`${submission.id === vote?.id
+                    ? "bg-hover-blue"
+                    : "bg-off-white"
                     } w-3/4 rounded-md p-3 transition-colors`}
-                  >
-                    <p className="text-2xl font-sans text-primary-blue">
-                      {submission.answer}
-                    </p>
-                  </button>
-                )}
-              </>
-            ))
+                >
+                  <p className="text-2xl font-sans text-primary-blue">
+                    {submission.answer}
+                  </p>
+                </button>
+              ))
           ) : (
             <p className="text-xl text-gray-600">
               No submissions for this round yet.
@@ -171,7 +166,7 @@ export default function VotingStage(props) {
       </div>
 
       {/* Add Narrator component */}
-      <Narrator 
+      <Narrator
         stage="VOTING"
         currentRound={props.currentRound}
         theme={props.theme}
