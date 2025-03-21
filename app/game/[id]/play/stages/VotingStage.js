@@ -1,6 +1,7 @@
 // Modified VotingStage.js with themed submit button
 import React, { useState, useEffect } from "react";
 import Alert from "../../../../components/Alert";
+import Narrator from "../../../../components/Narrator";
 import { useParams } from "next/navigation";
 import { init } from "@instantdb/react";
 
@@ -168,6 +169,16 @@ export default function VotingStage(props) {
           </div>
         </div>
       </div>
+
+      {/* Add Narrator component */}
+      <Narrator 
+        stage="VOTING"
+        currentRound={props.currentRound}
+        theme={props.theme}
+        prompt={props.prompt}
+        timeLeft={props.timeLeft}
+        submissions={submissions}
+      />
     </div>
   );
 }
