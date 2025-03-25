@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { join } from "path";
 import { useEffect } from "react";
 import { TypingAnimation } from "src/components/magicui/typing-animation";
+import Head from "next/head";
 
 // ID for app: cwmf
 const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
@@ -40,6 +41,10 @@ function LandingPage() {
 
   return (
     <div className="h-screen bg-background-blue">
+      <Head>
+        <title>cwmf</title>
+        <link rel="icon" href="../public/favicon.ico" />
+      </Head>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-screen">
         <div className="mx-auto max-w-3xl flex h-full">
           <div className="w-full m-auto justify-center items-center flex flex-col">
