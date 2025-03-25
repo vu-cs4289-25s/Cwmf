@@ -21,7 +21,6 @@ export default function VotingStage(props) {
   const gameCode = params.id;
   const [vote, setVote] = useState(null);
   const [hasVoted, setHasVoted] = useState(false);
-  const [showAlert, setShowAlert] = useState(true);
   const [showNoSubmissionAlert, setShowNoSubmissionAlert] = useState(
     props.showNoSubmissionAlert
   );
