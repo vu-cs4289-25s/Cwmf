@@ -1,5 +1,11 @@
 // Modified VotingStage.js with themed submit button
-import React, { useState, useEffect } from "react";
+import {
+  emoji,
+  emojiNames,
+  refsInit,
+  animateEmoji,
+} from "../../../../utils/emojiUtils"; // adjust path
+import React, { useState, useEffect, useRef } from "react";
 import Alert from "../../../../components/Alert";
 import Narrator from "../../../../components/Narrator";
 import { useParams } from "next/navigation";
@@ -20,6 +26,11 @@ export default function VotingStage(props) {
   const [submissions, setSubmissions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const roundId = params.roundId;
+
+  const room = db.room("voting-room", gameCode); // gameCode = roomId
+  const publishEmoji = db.rooms.usePublishTopic(room, "emoji");
+
+  const elRefsRef = useRef(refsInit);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -51,6 +62,21 @@ export default function VotingStage(props) {
       console.error("Error submitting vote:", error);
     }
   };
+
+  // Add listening for reactions
+  db.rooms.useTopicEffect(
+    room,
+    "emoji",
+    ({ name, directionAngle, rotationAngle }) => {
+      const emojiChar = emoji[name];
+      if (!emojiChar) return;
+
+      animateEmoji(
+        { emoji: emojiChar, directionAngle, rotationAngle },
+        elRefsRef.current[name]?.current
+      );
+    }
+  );
 
   // Fetch round data with submissions when the component mounts
   useEffect(() => {
@@ -92,6 +118,12 @@ export default function VotingStage(props) {
 
   return (
     <div className="flex min-h-screen flex-col bg-background-blue">
+      {/* Hidden emoji ref targets */}
+      <div className="hidden">
+        {emojiNames.map((name) => (
+          <div key={name} ref={elRefsRef.current[name]} />
+        ))}
+      </div>
       {/* Show alert only when showNoSubmissionAlert is true */}
       {showNoSubmissionAlert && (
         <Alert
@@ -152,6 +184,23 @@ export default function VotingStage(props) {
               onClick={() => {
                 handleVote(vote);
                 setHasVoted(true);
+
+                // Optional: trigger emoji (e.g., confetti) when vote submitted
+                const emojiType = "confetti"; // pick based on event, or randomize
+                const params = {
+                  name: emojiType,
+                  rotationAngle: Math.random() * 360,
+                  directionAngle: Math.random() * 360,
+                };
+                animateEmoji(
+                  {
+                    emoji: emoji[emojiType],
+                    rotationAngle: params.rotationAngle,
+                    directionAngle: params.directionAngle,
+                  },
+                  elRefsRef.current[emojiType].current
+                );
+                publishEmoji(params);
               }}
               className="mt-6 px-6 py-3 w-1/2 rounded-md bg-primary-blue text-2xl font-semibold font-sans text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 tracking-wide transition-colors"
             >
@@ -160,6 +209,44 @@ export default function VotingStage(props) {
           )}
         </div>
       )}
+
+      <div className="fixed bottom-20 left-0 right-0 flex justify-around bg-off-white p-2 z-10">
+        {emojiNames.map(
+          (name) => (
+            console.log(name),
+            (
+              <div
+                className="relative"
+                key={name}
+                ref={elRefsRef.current[name]}
+              >
+                <button
+                  onClick={() => {
+                    const params = {
+                      name,
+                      rotationAngle: Math.random() * 360,
+                      directionAngle: Math.random() * 360,
+                    };
+                    animateEmoji(
+                      {
+                        emoji: emoji[name],
+                        rotationAngle: params.rotationAngle,
+                        directionAngle: params.directionAngle,
+                      },
+                      elRefsRef.current[name].current
+                    );
+
+                    publishEmoji(params);
+                  }}
+                  className="text-3xl p-4 w-full hover:scale-110 transition-transform duration-150"
+                >
+                  {emoji[name]}
+                </button>
+              </div>
+            )
+          )
+        )}
+      </div>
 
       {/* Fixed bottom section with timer */}
       <div className="fixed bottom-0 left-0 right-0 bg-off-white">
@@ -171,7 +258,7 @@ export default function VotingStage(props) {
       </div>
 
       {/* Add Narrator component */}
-      <Narrator 
+      <Narrator
         stage="VOTING"
         currentRound={props.currentRound}
         theme={props.theme}
