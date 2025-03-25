@@ -3,9 +3,9 @@ import { createRef } from "react";
 
 export const emoji = {
   fire: "🔥",
-  wave: "👋",
-  confetti: "🎉",
-  heart: "❤️",
+  dislike: "👎",
+  devil: "😈",
+  poop: "💩",
 };
 
 export const emojiNames = Object.keys(emoji);

@@ -1,4 +1,6 @@
 // Modified VotingStage.js with themed submit button
+"use client";
+
 import {
   emoji,
   emojiNames,
@@ -9,7 +11,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Alert from "../../../../components/Alert";
 import Narrator from "../../../../components/Narrator";
 import { useParams } from "next/navigation";
-import { init } from "@instantdb/react";
+import { init, Cursors } from "@instantdb/react";
 
 const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
 const db = init({ appId: APP_ID });
@@ -29,6 +31,10 @@ export default function VotingStage(props) {
 
   const room = db.room("voting-room", gameCode); // gameCode = roomId
   const publishEmoji = db.rooms.usePublishTopic(room, "emoji");
+
+  const submissionRefs = useRef({});
+  const emojiButtonRefs = useRef({});
+  const [emojiRefsReady, setEmojiRefsReady] = useState(false);
 
   const elRefsRef = useRef(refsInit);
 
@@ -67,13 +73,20 @@ export default function VotingStage(props) {
   db.rooms.useTopicEffect(
     room,
     "emoji",
-    ({ name, directionAngle, rotationAngle }) => {
+    ({ name, directionAngle, rotationAngle, targetId }) => {
       const emojiChar = emoji[name];
       if (!emojiChar) return;
 
+      const targetEl = emojiButtonRefs.current?.[targetId]?.[name];
+      if (!targetEl) return;
+
       animateEmoji(
-        { emoji: emojiChar, directionAngle, rotationAngle },
-        elRefsRef.current[name]?.current
+        {
+          emoji: emojiChar,
+          directionAngle,
+          rotationAngle,
+        },
+        targetEl
       );
     }
   );
@@ -116,156 +129,178 @@ export default function VotingStage(props) {
     setShowNoSubmissionAlert(false);
   };
 
+  // Initialize emoji refs when the component mounts
+  useEffect(() => {
+    const checkRefsReady = () => {
+      const ready =
+        submissions.length > 0 &&
+        submissions.every((s) => emojiButtonRefs.current[s.id]);
+
+      if (ready) {
+        setEmojiRefsReady(true);
+      } else {
+        // Retry shortly in case refs weren’t set yet
+        setTimeout(checkRefsReady, 50);
+      }
+    };
+
+    checkRefsReady();
+  });
+
   return (
-    <div className="flex min-h-screen flex-col bg-background-blue">
-      {/* Hidden emoji ref targets */}
-      <div className="hidden">
-        {emojiNames.map((name) => (
-          <div key={name} ref={elRefsRef.current[name]} />
-        ))}
-      </div>
-      {/* Show alert only when showNoSubmissionAlert is true */}
-      {showNoSubmissionAlert && (
-        <Alert
-          message="Time's Up!"
-          subtitle="You didn't submit an answer in time. Time to vote on other players' answers..."
-          duration={2000}
-          onDismiss={handleAlertDismiss}
-        />
-      )}
+    <Cursors room={room} className="h-full w-full" userCursorColor="tomato">
+      <div style={{ width: "100vw", height: "100vh" }}>
+        <div className="flex min-h-screen flex-col bg-background-blue">
+          {/* Hidden emoji ref targets */}
+          <div className="hidden">
+            {emojiNames.map((name) => (
+              <div key={name} ref={elRefsRef.current[name]} />
+            ))}
+          </div>
+          {/* Show alert only when showNoSubmissionAlert is true */}
+          {showNoSubmissionAlert && (
+            <Alert
+              message="Time's Up!"
+              subtitle="You didn't submit an answer in time. Time to vote on other players' answers..."
+              duration={2000}
+              onDismiss={handleAlertDismiss}
+            />
+          )}
 
-      <div className="text-center pt-8 pb-0">
-        <h1 className="text-center text-4xl py-5 font-sans text-primary-blue">
-          Round {props.currentRound}
-        </h1>
-        <h3 className="text-2xl font-sans text-primary-blue">
-          Theme: {props.theme}
-        </h3>
-      </div>
-      <div className="text-center pt-30 pb-0">
-        <h1 className="text-center text-6xl py-5 font-sans text-primary-blue">
-          {props.prompt}
-        </h1>
-      </div>
+          <div className="text-center pt-8 pb-0">
+            <h1 className="text-center text-4xl py-5 font-sans text-primary-blue">
+              Round {props.currentRound}
+            </h1>
+            <h3 className="text-2xl font-sans text-primary-blue">
+              Theme: {props.theme}
+            </h3>
+          </div>
+          <div className="text-center pt-30 pb-0">
+            <h1 className="text-center text-6xl py-5 font-sans text-primary-blue">
+              {props.prompt}
+            </h1>
+          </div>
 
-      {isLoading ? (
-        <div className="flex justify-center items-center mt-10">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-blue"></div>
-        </div>
-      ) : (
-        <div className="flex flex-col mt-10 space-y-5 items-center justify-center pb-32">
-          {submissions.length > 0 ? (
-            submissions.map((submission, index) => (
-              <>
-                {submission.playerId !== localStorage.getItem("UUID") && (
-                  <button
-                    onClick={() => setVote(submission)}
-                    key={submission.id || index}
-                    className={`${
-                      submission.id === vote?.id
-                        ? "bg-hover-blue"
-                        : "bg-off-white"
-                    } w-3/4 rounded-md p-3 transition-colors`}
-                  >
-                    <p className="text-2xl font-sans text-primary-blue">
-                      {submission.answer}
-                    </p>
-                  </button>
-                )}
-              </>
-            ))
+          {isLoading ? (
+            <div className="flex justify-center items-center mt-10">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-blue"></div>
+            </div>
           ) : (
-            <p className="text-xl text-gray-600">
-              No submissions for this round yet.
-            </p>
-          )}
-          {vote && hasVoted == false && (
-            <button
-              onClick={() => {
-                handleVote(vote);
-                setHasVoted(true);
+            <div className="flex flex-col mt-10 space-y-5 items-center justify-center pb-32">
+              {submissions.length > 0 ? (
+                submissions.map((submission, index) => {
+                  const isOwnSubmission =
+                    submission.playerId === localStorage.getItem("UUID");
 
-                // Optional: trigger emoji (e.g., confetti) when vote submitted
-                const emojiType = "confetti"; // pick based on event, or randomize
-                const params = {
-                  name: emojiType,
-                  rotationAngle: Math.random() * 360,
-                  directionAngle: Math.random() * 360,
-                };
-                animateEmoji(
-                  {
-                    emoji: emoji[emojiType],
-                    rotationAngle: params.rotationAngle,
-                    directionAngle: params.directionAngle,
-                  },
-                  elRefsRef.current[emojiType].current
-                );
-                publishEmoji(params);
-              }}
-              className="mt-6 px-6 py-3 w-1/2 rounded-md bg-primary-blue text-2xl font-semibold font-sans text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 tracking-wide transition-colors"
-            >
-              Submit Vote
-            </button>
-          )}
-        </div>
-      )}
+                  return (
+                    <div
+                      key={submission.id || index}
+                      ref={(el) => (submissionRefs.current[submission.id] = el)}
+                      className={`${
+                        submission.id === vote?.id
+                          ? "bg-hover-blue"
+                          : "bg-off-white"
+                      } w-3/4 rounded-md p-4 transition-colors`}
+                    >
+                      <p className="text-2xl font-sans text-primary-blue text-center mb-2">
+                        {submission.answer}
+                      </p>
 
-      <div className="fixed bottom-20 left-0 right-0 flex justify-around bg-off-white p-2 z-10">
-        {emojiNames.map(
-          (name) => (
-            console.log(name),
-            (
-              <div
-                className="relative"
-                key={name}
-                ref={elRefsRef.current[name]}
-              >
+                      {/* Emoji reaction row */}
+                      <div className="flex justify-center gap-4 mt-2">
+                        {emojiNames.map((name) => {
+                          // Initialize nested ref map
+                          if (!emojiButtonRefs.current[submission.id]) {
+                            emojiButtonRefs.current[submission.id] = {};
+                          }
+
+                          return (
+                            <button
+                              key={name}
+                              ref={(el) =>
+                                (emojiButtonRefs.current[submission.id][name] =
+                                  el)
+                              }
+                              className="text-2xl hover:scale-110 transition-transform duration-150"
+                              onClick={(e) => {
+                                const buttonEl = e.currentTarget;
+
+                                const params = {
+                                  name,
+                                  rotationAngle: Math.random() * 360,
+                                  directionAngle: Math.random() * 360,
+                                  targetId: submission.id,
+                                };
+
+                                animateEmoji(
+                                  {
+                                    emoji: emoji[name],
+                                    rotationAngle: params.rotationAngle,
+                                    directionAngle: params.directionAngle,
+                                  },
+                                  buttonEl
+                                );
+
+                                publishEmoji(params);
+                              }}
+                            >
+                              {emoji[name]}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Voting button (only for others) */}
+                      {!isOwnSubmission && (
+                        <button
+                          onClick={() => setVote(submission)}
+                          className="mt-3 w-full rounded-md bg-primary-blue py-2 text-off-white text-xl font-semibold hover:bg-hover-blue transition-colors"
+                        >
+                          Vote
+                        </button>
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-xl text-gray-600">
+                  No submissions for this round yet.
+                </p>
+              )}
+              {vote && hasVoted == false && (
                 <button
                   onClick={() => {
-                    const params = {
-                      name,
-                      rotationAngle: Math.random() * 360,
-                      directionAngle: Math.random() * 360,
-                    };
-                    animateEmoji(
-                      {
-                        emoji: emoji[name],
-                        rotationAngle: params.rotationAngle,
-                        directionAngle: params.directionAngle,
-                      },
-                      elRefsRef.current[name].current
-                    );
-
-                    publishEmoji(params);
+                    handleVote(vote);
+                    setHasVoted(true);
                   }}
-                  className="text-3xl p-4 w-full hover:scale-110 transition-transform duration-150"
+                  className="mt-6 px-6 py-3 w-1/2 rounded-md bg-primary-blue text-2xl font-semibold font-sans text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 tracking-wide transition-colors"
                 >
-                  {emoji[name]}
+                  Submit Vote
                 </button>
-              </div>
-            )
-          )
-        )}
-      </div>
+              )}
+            </div>
+          )}
 
-      {/* Fixed bottom section with timer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-off-white">
-        <div className="max-w-md mx-auto flex flex-col items-center p-4">
-          <div className="text-6xl font-bold font-sans text-primary-blue">
-            {formatTime(props.timeLeft)}
+          {/* Fixed bottom section with timer */}
+          <div className="fixed bottom-0 left-0 right-0 bg-off-white">
+            <div className="max-w-md mx-auto flex flex-col items-center p-4">
+              <div className="text-6xl font-bold font-sans text-primary-blue">
+                {formatTime(props.timeLeft)}
+              </div>
+            </div>
           </div>
+
+          {/* Add Narrator component */}
+          <Narrator
+            stage="VOTING"
+            currentRound={props.currentRound}
+            theme={props.theme}
+            prompt={props.prompt}
+            timeLeft={props.timeLeft}
+            submissions={submissions}
+          />
         </div>
       </div>
-
-      {/* Add Narrator component */}
-      <Narrator
-        stage="VOTING"
-        currentRound={props.currentRound}
-        theme={props.theme}
-        prompt={props.prompt}
-        timeLeft={props.timeLeft}
-        submissions={submissions}
-      />
-    </div>
+    </Cursors>
   );
 }
