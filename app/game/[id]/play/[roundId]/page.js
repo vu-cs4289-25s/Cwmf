@@ -101,7 +101,7 @@ export default function PlayPage() {
           const newRoundId = instantID();
           await db.transact(
             db.tx.games[game.id].update({
-              nextRoundId: newRoundId
+              nextRoundId: newRoundId,
             })
           );
         }
@@ -159,19 +159,22 @@ export default function PlayPage() {
           // Continue to next round
           const currentNextRoundId = game.nextRoundId;
           const futureRoundId = instantID();
-          const newAcronym = getAcronym('pronounceable');
+          // Generate a new acronym for the new round
+          const newAcronym = getAcronym("pronounceable");
 
           let nextRoundTheme = game.theme;
           let nextCustomThemeIndex = (game.currentCustomThemeIndex || 0) + 1;
-          let usedStandardThemes = Array.isArray(game.usedStandardThemes) ? [...game.usedStandardThemes] : [];
-
+          let usedStandardThemes = Array.isArray(game.usedStandardThemes)
+            ? [...game.usedStandardThemes]
+            : [];
 
           if (!game.useRandomThemes) {
             // Check if we have custom themes available and haven't used them all
-            if (Array.isArray(game.customThemes) &&
+            if (
+              Array.isArray(game.customThemes) &&
               game.customThemes.length > 0 &&
-              nextCustomThemeIndex < game.customThemes.length) {
-
+              nextCustomThemeIndex < game.customThemes.length
+            ) {
               // Get the next custom theme
               nextRoundTheme = game.customThemes[nextCustomThemeIndex];
 
@@ -204,7 +207,7 @@ export default function PlayPage() {
             theme: nextRoundTheme,
             currentRoundTheme: nextRoundTheme,
             currentCustomThemeIndex: nextCustomThemeIndex,
-            usedStandardThemes: usedStandardThemes
+            usedStandardThemes: usedStandardThemes,
           };
 
           try {
@@ -228,9 +231,8 @@ export default function PlayPage() {
               }),
 
               // Update the game with our complete object
-              db.tx.games[game.id].update(gameUpdateObject)
+              db.tx.games[game.id].update(gameUpdateObject),
             ]);
-
           } catch (error) {
             console.error("ERROR: Failed to update game state:", error);
           }
@@ -243,7 +245,7 @@ export default function PlayPage() {
             timerStart: Date.now(),
             timeLeft: nextDuration,
             isTimerRunning: true,
-            hostId: game.hostId
+            hostId: game.hostId,
           })
         );
       }
@@ -256,20 +258,20 @@ export default function PlayPage() {
 
   const getNextStage = (currentStage) => {
     const stages = {
-      "PREP": "GAME",
-      "GAME": "VOTING", // Everyone goes to voting when time expires
-      "VOTING": "RESULTS",
-      "RESULTS": "PREP"
+      PREP: "GAME",
+      GAME: "VOTING", // Everyone goes to voting when time expires
+      VOTING: "RESULTS",
+      RESULTS: "PREP",
     };
     return stages[currentStage] || "PREP";
   };
 
   const getStageDuration = (stageName) => {
     const durations = {
-      "PREP": 5,     // 5 seconds to prepare
-      "GAME": 30,    // 30 seconds to enter answer
-      "VOTING": 15,  // 15 seconds to vote
-      "RESULTS": 10  // 10 seconds to show results
+      PREP: 10000, // 5 seconds to prepare
+      GAME: 60, // 30 seconds to enter answer
+      VOTING: 60, // 15 seconds to vote
+      RESULTS: 100000, // 10 seconds to show results
     };
     return durations[stageName] || 30;
   };
@@ -279,14 +281,22 @@ export default function PlayPage() {
 
     if (answer !== "") {
       // Store in localStorage
-      localStorage.setItem(`answer_${params.id}_${game.currentRound || 1}`, answer);
+      localStorage.setItem(
+        `answer_${params.id}_${game.currentRound || 1}`,
+        answer
+      );
 
       // Store answer in the database
       const updatedAnswers = [...(game.answers || []), answer];
-      await db.transact(db.tx.games[game.id].update({
-        answers: updatedAnswers,
-        submittedPlayers: [...(game.submittedPlayers || []), "currentPlayerId"]
-      }));
+      await db.transact(
+        db.tx.games[game.id].update({
+          answers: updatedAnswers,
+          submittedPlayers: [
+            ...(game.submittedPlayers || []),
+            "currentPlayerId",
+          ],
+        })
+      );
       setHasSubmitted(true);
     }
   };
@@ -295,11 +305,18 @@ export default function PlayPage() {
     if (!game) return <div>Loading...</div>;
 
     // Get the saved answer from localStorage for the current round
-    const savedAnswer = typeof window !== 'undefined' ?
-      localStorage.getItem(`answer_${params.id}_${game.currentRound || 1}`) : '';
+    const savedAnswer =
+      typeof window !== "undefined"
+        ? localStorage.getItem(`answer_${params.id}_${game.currentRound || 1}`)
+        : "";
 
     // Use currentRoundTheme as the primary source, fallback to theme only if needed
-    const currentTheme = game.currentRoundTheme || game.theme || "Things a pirate would say";
+    const currentTheme =
+      game.currentRoundTheme || game.theme || "Things a pirate would say";
+
+    // Use currentRoundTheme as the primary source, fallback to theme only if needed
+    const currentTheme =
+      game.currentRoundTheme || game.theme || "Things a pirate would say";
 
     const commonProps = {
       currentRound: game.currentRound || 1,
@@ -320,10 +337,7 @@ export default function PlayPage() {
       case "PREP":
         return <PrepStage {...commonProps} />;
       case "GAME":
-        return <GameStage
-          {...commonProps}
-          handleSubmit={handleSubmitAnswer}
-        />;
+        return <GameStage {...commonProps} handleSubmit={handleSubmitAnswer} />;
       case "VOTING":
         return (
           <VotingStage

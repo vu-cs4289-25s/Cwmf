@@ -110,7 +110,7 @@ const Narrator = ({
   const message = commentary[randomIndex];
 
   return (
-    <div className="fixed bottom-24 left-0 right-0 z-50">
+    <div className="fixed bottom-24 flex w-3/4 justify-self-center mb-4 left-0 right-0 z-50">
       <div className="max-w-md mx-auto bg-off-white rounded-lg shadow-lg p-4 transform transition-all duration-600 hover:scale-105">
         <div className="flex items-center justify-center space-x-2">
           <span className="text-2xl">🤖</span>

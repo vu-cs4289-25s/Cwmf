@@ -43,9 +43,17 @@ function LandingPage() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-screen">
         <div className="mx-auto max-w-3xl flex h-full">
           <div className="w-full m-auto justify-center items-center flex flex-col">
-            <h1 className="text-center text-8xl py-3 text-primary-blue font-sans">cwmf</h1>
+            <h1 className="text-center text-8xl py-3 text-primary-blue font-sans">
+              cwmf
+            </h1>
             <div className="mb-10 h-14">
-            <TypingAnimation className="font-sans text-primary-blue text-4xl" duration="200" delay="200">cool word mind fun...</TypingAnimation>
+              <TypingAnimation
+                className="font-sans text-primary-blue text-4xl"
+                duration="200"
+                delay="200"
+              >
+                cool word mind fun...
+              </TypingAnimation>
             </div>
             <Link href="/join">
               <button
