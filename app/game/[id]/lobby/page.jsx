@@ -151,17 +151,20 @@ export default function LobbyPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background-blue">
-      <div className="text-center pt-8 pb-0">
-        <h1 className="text-center text-8xl py-5 text-primary-blue font-sans">
+      {/* Header section - responsive text sizes */}
+      <div className="text-center pt-4 sm:pt-8 pb-0">
+        <h1 className="text-center text-5xl sm:text-6xl md:text-7xl lg:text-8xl py-3 sm:py-5 text-primary-blue font-sans">
           cwmf
         </h1>
-        <h3 className="text-2xl font-sans text-primary-blue">
+        <h3 className="text-lg sm:text-xl md:text-2xl font-sans text-primary-blue">
           game code: {id}
         </h3>
       </div>
 
-      <div className="flex flex-1 justify-center items-center gap-20 px-8 -mt-80">
-        <div className="bg-off-white shadow-lg rounded-lg p-6 w-80">
+      {/* Main content - changes from column on mobile to row on larger screens */}
+      <div className="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-12 lg:gap-20 px-4 sm:px-8 mt-8 md:mt-12">
+        {/* Game settings card - responsive width */}
+        <div className="bg-off-white shadow-lg rounded-lg p-4 sm:p-6 w-full max-w-xs">
           <h2 className="text-xl font-semibold mb-4 text-center font-sans tracking-wide text-primary-blue">
             game settings
           </h2>
@@ -180,7 +183,6 @@ export default function LobbyPage() {
                 things a pirate would say
               </p>
             </div>
-            {/* New field for max rounds */}
             <div>
               <label className="block text-primary-blue font-sans mb-2">
                 number of rounds
@@ -223,26 +225,23 @@ export default function LobbyPage() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-8">
-          <div className="flex flex-wrap gap-8 justify-center max-w-md">
-            <ul>
-              {gameData?.players &&
-                typeof gameData.players === "object" &&
-                Object.entries(gameData?.players).map(([playerId, player]) => (
-                  <span key={playerId}>
-                    <div className="flex flex-col items-center">
-                      <div className="inline-flex items-center justify-center size-16 rounded-full ring-2 ring-off-white bg-primary-blue text-off-white mt-4">
-                        <span className="text-lg font-sans font-bold">
-                          {player.name[0].toUpperCase()}
-                        </span>
-                      </div>
-                      <span className="mt-2 font-sans text-primary-blue">
-                        {player.name}
-                      </span>
-                    </div>
+        {/* Players section - responsive grid */}
+        <div className="flex flex-col items-center">
+          <div className="grid grid-cols-3 gap-4 sm:gap-6 justify-center max-w-md">
+            {gameData?.players &&
+              typeof gameData.players === "object" &&
+              Object.entries(gameData?.players).map(([playerId, player]) => (
+                <div key={playerId} className="flex flex-col items-center">
+                  <div className="inline-flex items-center justify-center size-12 sm:size-16 rounded-full ring-2 ring-off-white bg-primary-blue text-off-white">
+                    <span className="text-base sm:text-lg font-sans font-bold">
+                      {player.name[0].toUpperCase()}
+                    </span>
+                  </div>
+                  <span className="mt-2 font-sans text-primary-blue text-sm sm:text-base truncate max-w-24">
+                    {player.name}
                   </span>
-                ))}
-            </ul>
+                </div>
+              ))}
           </div>
         </div>
       </div>

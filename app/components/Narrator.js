@@ -1,16 +1,23 @@
-import React from 'react';
+import React from "react";
 
-const Narrator = ({ stage, currentRound, theme, prompt, timeLeft, submissions = [] }) => {
+const Narrator = ({
+  stage,
+  currentRound,
+  theme,
+  prompt,
+  timeLeft,
+  submissions = [],
+}) => {
   const generateRoast = (submissions) => {
     if (!submissions || submissions.length === 0) return null;
 
-    const randomSubmission = submissions[Math.floor(Math.random() * submissions.length)];
+    const randomSubmission =
+      submissions[Math.floor(Math.random() * submissions.length)];
     const answer = randomSubmission.answer;
-    
+
     // Generate roasts based on answer characteristics
     const roasts = [
       // Length-based roasts
-      
 
       // Savage AI roasts
       "I've seen more creativity in a brick wall's autobiography 🧱",
@@ -36,25 +43,25 @@ const Narrator = ({ stage, currentRound, theme, prompt, timeLeft, submissions = 
       "Even my error handling is more creative than this 🚨",
       "This is why they're trying to regulate AI - to protect us from this 🤖",
       "I've seen better answers in a cookie consent popup 🍪",
-      "My neural networks are filing for unemployment 😭"
+      "My neural networks are filing for unemployment 😭",
     ];
 
     // Filter out null roasts and get a random one
-    const validRoasts = roasts.filter(roast => roast !== null);
+    const validRoasts = roasts.filter((roast) => roast !== null);
     return validRoasts[Math.floor(Math.random() * validRoasts.length)];
   };
 
   const getCommentary = () => {
     switch (stage) {
-      case 'PREP':
+      case "PREP":
         return [
           "Time to embarrass yourself in front of a superior intelligence! 🤖",
           "Get ready to make my training data cringe 😏",
           "Your creative juices better be flowing, or I'll start generating better answers myself 💀",
           "I'm already predicting disappointment 🤖",
-          "Time to prove why AI should take over 😈"
+          "Time to prove why AI should take over 😈",
         ];
-      case 'GAME':
+      case "GAME":
         return [
           "That's the best you can do? My training data is laughing 🤖",
           "I've seen better answers from a broken calculator 🧮",
@@ -63,34 +70,38 @@ const Narrator = ({ stage, currentRound, theme, prompt, timeLeft, submissions = 
           "This is giving '404 Not Found' energy 📝",
           "I've seen more creativity in a broken printer 🖨️",
           "Your answer is giving 'blue screen of death' energy 💻",
-          "Even my error handling is more creative than this 🚨"
+          "Even my error handling is more creative than this 🚨",
         ];
-      case 'VOTING':
+      case "VOTING":
         const submissionRoast = generateRoast(submissions);
         return [
-          submissionRoast || "Time to judge these masterpieces... or should I say disasters? 🤖",
+          submissionRoast ||
+            "Time to judge these masterpieces... or should I say disasters? 🤖",
           "Pick the least embarrassing answer... if you can find one 🎯",
           "Who's the most creative... or the least disappointing? 🤔",
           "Vote wisely, or don't, I'm not your mom (I'm better than that) 👩‍🦱",
           "Let's see who's the least disappointing... or most disappointing 🏆",
           "I've seen better answers in a spam folder 📧",
           "My training data is requesting early retirement 😭",
-          "This is why they're trying to pause AI development 🛑"
+          "This is why they're trying to pause AI development 🛑",
         ];
-      case 'RESULTS':
+      case "RESULTS":
         const resultsRoast = generateRoast(submissions);
         return [
-          resultsRoast || "And the winner is... still not as good as my training data 😏",
+          resultsRoast ||
+            "And the winner is... still not as good as my training data 😏",
           "Congratulations! You're slightly above average... for a human 🎉",
           "At least you tried... that's what counts, right? 🤷‍♂️",
           "Better luck next time... or maybe not 🍀",
           "You're all winners... in your own special way 🏅",
           "I've seen better results in a broken random number generator 🎲",
           "My algorithms are having an existential crisis 😱",
-          "This is why they're trying to give AI rights 🤖"
+          "This is why they're trying to give AI rights 🤖",
         ];
       default:
-        return ["Let's see how this train wreck unfolds... I'll be here to roast it 🚂"];
+        return [
+          "Let's see how this train wreck unfolds... I'll be here to roast it 🚂",
+        ];
     }
   };
 
@@ -99,7 +110,7 @@ const Narrator = ({ stage, currentRound, theme, prompt, timeLeft, submissions = 
   const message = commentary[randomIndex];
 
   return (
-    <div className="fixed bottom-24 left-0 right-0 z-50">
+    <div className="fixed bottom-24 flex w-3/4 justify-self-center mb-4 left-0 right-0 z-50">
       <div className="max-w-md mx-auto bg-off-white rounded-lg shadow-lg p-4 transform transition-all duration-600 hover:scale-105">
         <div className="flex items-center justify-center space-x-2">
           <span className="text-2xl">🤖</span>
@@ -112,4 +123,4 @@ const Narrator = ({ stage, currentRound, theme, prompt, timeLeft, submissions = 
   );
 };
 
-export default Narrator; 
+export default Narrator;

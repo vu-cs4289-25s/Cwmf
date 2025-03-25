@@ -111,7 +111,7 @@ export default function GameStage(props) {
         </h3>
       </div>
       <div className="text-center h-full flex items-center justify-center flex-col">
-        <h1 className="text-center text-9xl mb-24 py-5 font-sans text-primary-blue">
+        <h1 className="text-center text-8xl md:text-9xl mb-10 py-5 font-sans text-primary-blue">
           {props.prompt}
         </h1>
         {submittedAnswer ? (
@@ -122,17 +122,20 @@ export default function GameStage(props) {
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="flex flex-col items-center w-5/12 mt-8"
+            className="flex flex-col items-center w-3/4 md:w-5/12 mt-8"
           >
             <div className="flex flex-col gap-y-5 w-full items-center mb-10">
               {promptLetters.map((letter, index) => {
                 return (
-                  <div key={index} className="flex flex-row w-full">
-                    <p className="font-sans text-5xl text-primary-blue mr-6">
+                  <div
+                    key={index}
+                    className="flex flex-row w-full items-center"
+                  >
+                    <div className="font-sans text-5xl text-primary-blue mr-3 w-12">
                       {letter}
-                    </p>
+                    </div>
                     <input
-                      className="block w-full rounded-md bg-off-white px-3 py-1.5 text-primary-blue font-sans placeholder:text-gray-500 placeholder:font-sans focus:outline-2  focus:outline-primary-blue text-xl h-12"
+                      className="block w-full rounded-md bg-off-white px-3 py-1.5 text-primary-blue font-sans placeholder:text-gray-500 placeholder:font-sans focus:outline-2  focus:outline-primary-blue text-sm md:text-xl h-10 md:h-12"
                       onChange={(e) => {
                         setAnswerErrorMsg("");
                         let words = [...answerWords];

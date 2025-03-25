@@ -122,15 +122,19 @@ export default function VotingStage(props) {
         <div className="flex flex-col mt-10 space-y-5 items-center justify-center pb-32">
           {submissions.length > 0 ? (
             submissions
-              .filter(submission => submission.playerId !== localStorage.getItem("UUID"))
+              .filter(
+                (submission) =>
+                  submission.playerId !== localStorage.getItem("UUID")
+              )
               .map((submission, index) => (
                 <button
                   onClick={() => setVote(submission)}
                   key={submission.id || `submission-${index}`}
-                  className={`${submission.id === vote?.id
-                    ? "bg-hover-blue"
-                    : "bg-off-white"
-                    } w-3/4 rounded-md p-3 transition-colors`}
+                  className={`${
+                    submission.id === vote?.id
+                      ? "bg-hover-blue"
+                      : "bg-off-white"
+                  } w-3/4 rounded-md p-3 transition-colors`}
                 >
                   <p className="text-2xl font-sans text-primary-blue">
                     {submission.answer}

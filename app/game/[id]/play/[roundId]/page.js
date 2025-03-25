@@ -102,7 +102,7 @@ export default function PlayPage() {
           const newRoundId = instantID();
           await db.transact(
             db.tx.games[game.id].update({
-              nextRoundId: newRoundId
+              nextRoundId: newRoundId,
             })
           );
         }
@@ -149,7 +149,7 @@ export default function PlayPage() {
               shouldRedirect: false,
               redirectPath: `/game/${params.id}/lobby`,
               // Make sure hostId is preserved
-              hostId: game.hostId || localStorage.getItem("UUID")
+              hostId: game.hostId || localStorage.getItem("UUID"),
             })
           );
         } else {
@@ -158,7 +158,7 @@ export default function PlayPage() {
           // Generate a new nextRoundId for the future round
           const futureRoundId = instantID();
           // Generate a new acronym for the new round
-          const newAcronym = getAcronym('pronounceable');
+          const newAcronym = getAcronym("pronounceable");
 
           await db.transact([
             // Create the new round
@@ -192,7 +192,7 @@ export default function PlayPage() {
               shouldRedirect: true,
               redirectTo: `/game/${params.id}/play/${currentNextRoundId}`,
               // Preserve host ID when moving to next round
-              hostId: game.hostId
+              hostId: game.hostId,
             }),
           ]);
         }
@@ -205,7 +205,7 @@ export default function PlayPage() {
             timeLeft: nextDuration,
             isTimerRunning: true,
             // Preserve host ID during normal stage transitions
-            hostId: game.hostId
+            hostId: game.hostId,
           })
         );
       }
@@ -218,20 +218,20 @@ export default function PlayPage() {
 
   const getNextStage = (currentStage) => {
     const stages = {
-      "PREP": "GAME",
-      "GAME": "VOTING", // Everyone goes to voting when time expires
-      "VOTING": "RESULTS",
-      "RESULTS": "PREP"
+      PREP: "GAME",
+      GAME: "VOTING", // Everyone goes to voting when time expires
+      VOTING: "RESULTS",
+      RESULTS: "PREP",
     };
     return stages[currentStage] || "PREP";
   };
 
   const getStageDuration = (stageName) => {
     const durations = {
-      "PREP": 5,     // 5 seconds to prepare
-      "GAME": 30,    // 30 seconds to enter answer
-      "VOTING": 15,  // 15 seconds to vote
-      "RESULTS": 10  // 10 seconds to show results
+      PREP: 10000, // 5 seconds to prepare
+      GAME: 60, // 30 seconds to enter answer
+      VOTING: 60, // 15 seconds to vote
+      RESULTS: 100000, // 10 seconds to show results
     };
     return durations[stageName] || 30;
   };
@@ -241,14 +241,22 @@ export default function PlayPage() {
 
     if (answer !== "") {
       // Store in localStorage
-      localStorage.setItem(`answer_${params.id}_${game.currentRound || 1}`, answer);
+      localStorage.setItem(
+        `answer_${params.id}_${game.currentRound || 1}`,
+        answer
+      );
 
       // Store answer in the database
       const updatedAnswers = [...(game.answers || []), answer];
-      await db.transact(db.tx.games[game.id].update({
-        answers: updatedAnswers,
-        submittedPlayers: [...(game.submittedPlayers || []), "currentPlayerId"]
-      }));
+      await db.transact(
+        db.tx.games[game.id].update({
+          answers: updatedAnswers,
+          submittedPlayers: [
+            ...(game.submittedPlayers || []),
+            "currentPlayerId",
+          ],
+        })
+      );
       setHasSubmitted(true);
     }
   };
@@ -257,8 +265,10 @@ export default function PlayPage() {
     if (!game) return <div>Loading...</div>;
 
     // Get the saved answer from localStorage for the current round
-    const savedAnswer = typeof window !== 'undefined' ?
-      localStorage.getItem(`answer_${params.id}_${game.currentRound || 1}`) : '';
+    const savedAnswer =
+      typeof window !== "undefined"
+        ? localStorage.getItem(`answer_${params.id}_${game.currentRound || 1}`)
+        : "";
 
     const commonProps = {
       currentRound: game.currentRound || 1,
@@ -279,10 +289,7 @@ export default function PlayPage() {
       case "PREP":
         return <PrepStage {...commonProps} />;
       case "GAME":
-        return <GameStage
-          {...commonProps}
-          handleSubmit={handleSubmitAnswer}
-        />;
+        return <GameStage {...commonProps} handleSubmit={handleSubmitAnswer} />;
       case "VOTING":
         return (
           <VotingStage
