@@ -74,9 +74,21 @@ export default function VotingStage(props) {
     fetchRoundData();
   }, [roundId]);
 
+  // // Add debugging to understand what's happening with submissions
+  // useEffect(() => {
+  //   console.log("Current submissions:", submissions);
+  //   console.log("Current UUID:", localStorage.getItem("UUID"));
+
+  //   // Check if any submissions match the current user
+  //   const mySubmissions = submissions.filter(s => s.playerId === localStorage.getItem("UUID"));
+  //   console.log("My submissions:", mySubmissions);
+
+  //   // Check what submissions would be rendered
+  //   const visibleSubmissions = submissions.filter(s => s.playerId !== localStorage.getItem("UUID"));
+  //   console.log("Visible submissions:", visibleSubmissions);
+  // }, [submissions]);
+
   // Handle vote submission when time is up
-  // This effect will run when the timeLeft prop changes
-  // and if the timeLeft is 0, it will call handleVote with the selected vote
   useEffect(() => {
     if (props.timeLeft === 0 && vote) {
       console.log("Submitting vote:", vote);
@@ -121,6 +133,7 @@ export default function VotingStage(props) {
       ) : (
         <div className="flex flex-col mt-10 space-y-5 items-center justify-center pb-32">
           {submissions.length > 0 ? (
+            // Use filter before map to properly handle submissions
             submissions
               .filter(submission => submission.playerId !== localStorage.getItem("UUID"))
               .map((submission, index) => (
@@ -140,6 +153,11 @@ export default function VotingStage(props) {
           ) : (
             <p className="text-xl text-gray-600">
               No submissions for this round yet.
+            </p>
+          )}
+          {submissions.length > 0 && submissions.filter(s => s.playerId !== localStorage.getItem("UUID")).length === 0 && (
+            <p className="text-xl text-gray-600">
+              No other players' submissions to vote on.
             </p>
           )}
           {vote && hasVoted == false && (
