@@ -250,7 +250,7 @@ export default function LobbyPage() {
           isTimerRunning: true,
           answers: [],
           scores: {},
-          theme: selectedTheme,
+          theme: firstRoundTheme,
           prompt: firstAcronym,
           maxRounds: maxRounds,
           useRandomThemes: useRandomThemes,
