@@ -114,9 +114,21 @@ export default function VotingStage(props) {
     fetchRoundData();
   }, [roundId]);
 
+  // // Add debugging to understand what's happening with submissions
+  // useEffect(() => {
+  //   console.log("Current submissions:", submissions);
+  //   console.log("Current UUID:", localStorage.getItem("UUID"));
+
+  //   // Check if any submissions match the current user
+  //   const mySubmissions = submissions.filter(s => s.playerId === localStorage.getItem("UUID"));
+  //   console.log("My submissions:", mySubmissions);
+
+  //   // Check what submissions would be rendered
+  //   const visibleSubmissions = submissions.filter(s => s.playerId !== localStorage.getItem("UUID"));
+  //   console.log("Visible submissions:", visibleSubmissions);
+  // }, [submissions]);
+
   // Handle vote submission when time is up
-  // This effect will run when the timeLeft prop changes
-  // and if the timeLeft is 0, it will call handleVote with the selected vote
   useEffect(() => {
     if (props.timeLeft === 0 && vote) {
       console.log("Submitting vote:", vote);

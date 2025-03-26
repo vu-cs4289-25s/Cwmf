@@ -1,5 +1,4 @@
 // app/game/[id]/stages/GameOverStage.js
-
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 
@@ -67,26 +66,36 @@ export default function GameOverStage(props) {
         };
     }, [props.redirectPath, router]);
 
-    // Calculate winner based on vote counts
-    const calculateWinner = () => {
-        if (!voteData || !voteData.totalVoteCounts) {
-            return { winnerName: "Unknown", winnerScore: 0 };
+    // Calculate winner(s) based on vote counts with proper tie handling
+    const calculateWinners = () => {
+        if (!voteData || !voteData.totalVoteCounts || Object.keys(voteData.totalVoteCounts).length === 0) {
+            return { winners: [], highestScore: 0, isTie: false };
         }
 
         let highestScore = 0;
-        let winnerName = "";
+        let winners = [];
 
+        // First, find the highest score
         Object.entries(voteData.totalVoteCounts).forEach(([playerName, score]) => {
             if (score > highestScore) {
                 highestScore = score;
-                winnerName = playerName;
             }
         });
 
-        return { winnerName, winnerScore: highestScore };
+        // Then, collect all players with that score
+        Object.entries(voteData.totalVoteCounts).forEach(([playerName, score]) => {
+            if (score === highestScore) {
+                winners.push(playerName);
+            }
+        });
+
+        // Check if it's a tie
+        const isTie = winners.length > 1;
+
+        return { winners, highestScore, isTie };
     };
 
-    const { winnerName, winnerScore } = calculateWinner();
+    const { winners, highestScore, isTie } = calculateWinners();
 
     return (
         <div className="flex h-screen flex-col bg-background-blue">
@@ -106,18 +115,41 @@ export default function GameOverStage(props) {
                     </div>
                 ) : (
                     <div className="bg-off-white rounded-lg p-8 shadow-lg max-w-md">
-                        <h3 className="text-3xl font-sans text-primary-blue text-center mb-6">
-                            {!winnerName || winnerName === "Unknown" ? "It's a tie!" : `${winnerName} wins!`}
-                        </h3>
+                        {winners.length > 0 ? (
+                            <>
+                                <h3 className="text-3xl font-sans text-primary-blue text-center mb-6">
+                                    {isTie
+                                        ? `It's a ${winners.length}-way tie!`
+                                        : `${winners[0]} wins!`}
+                                </h3>
 
-                        {winnerName && winnerName !== "Unknown" && (
-                            <div className="flex justify-center mb-8">
-                                <div className="inline-flex items-center justify-center size-24 rounded-full bg-primary-blue text-off-white">
-                                    <span className="text-3xl font-sans font-bold">
-                                        {winnerName[0]?.toUpperCase() || "?"}
-                                    </span>
-                                </div>
-                            </div>
+                                {isTie ? (
+                                    <div className="flex flex-wrap justify-center gap-4 mb-8">
+                                        {winners.map((winner, index) => (
+                                            <div key={index} className="flex flex-col items-center">
+                                                <div className="inline-flex items-center justify-center size-16 rounded-full bg-primary-blue text-off-white">
+                                                    <span className="text-xl font-sans font-bold">
+                                                        {winner[0]?.toUpperCase() || "?"}
+                                                    </span>
+                                                </div>
+                                                <span className="mt-2 text-sm font-sans text-primary-blue">{winner}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : winners.length === 1 && (
+                                    <div className="flex justify-center mb-8">
+                                        <div className="inline-flex items-center justify-center size-24 rounded-full bg-primary-blue text-off-white">
+                                            <span className="text-3xl font-sans font-bold">
+                                                {winners[0][0]?.toUpperCase() || "?"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <h3 className="text-3xl font-sans text-primary-blue text-center mb-6">
+                                No winners found
+                            </h3>
                         )}
 
                         <div className="border-t border-gray-200 pt-6">
@@ -127,7 +159,10 @@ export default function GameOverStage(props) {
                                     Object.entries(voteData.totalVoteCounts)
                                         .sort(([, scoreA], [, scoreB]) => scoreB - scoreA)
                                         .map(([playerName, score]) => (
-                                            <div key={playerName} className="flex justify-between items-center">
+                                            <div key={playerName}
+                                                className={`flex justify-between items-center p-2 rounded ${winners.includes(playerName) ? 'bg-blue-100' : ''
+                                                    }`}
+                                            >
                                                 <span className="font-sans text-lg text-primary-blue">{playerName}</span>
                                                 <span className="font-sans font-bold text-xl text-primary-blue">{score}</span>
                                             </div>

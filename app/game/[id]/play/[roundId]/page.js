@@ -11,7 +11,7 @@ import VotingStage from "../stages/VotingStage";
 import ResultsStage from "../stages/ResultsStage";
 import GameOverStage from "../stages/GameOverStage";
 import { getAcronym } from "../../../../utils/acronymGenerator";
-import LobbyPage from "../../lobby/page";
+import { getRandomTheme } from "../../../../utils/themeBank";
 
 const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
 const db = init({ appId: APP_ID });
@@ -160,6 +160,21 @@ export default function PlayPage() {
           // Generate a new acronym for the new round
           const newAcronym = getAcronym('pronounceable');
 
+          // Determine theme for next round based on settings
+          let nextRoundTheme = game.theme || "Things a pirate would say";
+
+          if (game.useRandomThemes) {
+            // Check if we have custom themes
+            if (game.customThemes && game.customThemes.length > 0 && Math.random() > 0.7) {
+              // 30% chance to use a custom theme if available
+              const randomCustomIndex = Math.floor(Math.random() * game.customThemes.length);
+              nextRoundTheme = game.customThemes[randomCustomIndex];
+            } else {
+              // Otherwise use a theme from the standard theme bank
+              nextRoundTheme = getRandomTheme();
+            }
+          }
+
           await db.transact([
             // Create the new round
             db.tx.round[currentNextRoundId].update({
@@ -169,7 +184,7 @@ export default function PlayPage() {
               answers: [],
               submittedPlayers: [],
               votes: [],
-              theme: game.theme || "Things a pirate would say",
+              theme: nextRoundTheme, // Use the determined theme
               prompt: newAcronym,
             }),
 
@@ -192,7 +207,9 @@ export default function PlayPage() {
               shouldRedirect: true,
               redirectTo: `/game/${params.id}/play/${currentNextRoundId}`,
               // Preserve host ID when moving to next round
-              hostId: game.hostId
+              hostId: game.hostId,
+              // Update the current theme if using random themes
+              theme: game.useRandomThemes ? nextRoundTheme : game.theme
             }),
           ]);
         }
