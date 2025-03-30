@@ -1,4 +1,3 @@
-// app/game/[id]/play/page.js
 "use client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -55,7 +54,7 @@ export default function PlayPage() {
         if (localStorage.getItem("host") === "true") {
           db.transact(
             db.tx.games[game.id].update({
-              shouldRedirect: false,
+              // shouldRedirect: false,
               redirectTo: null,
             })
           );
@@ -130,6 +129,11 @@ export default function PlayPage() {
     setIsTransitioning(true);
 
     try {
+      // Log current state for debugging
+      console.log("Current game theme:", game.theme);
+      console.log("Current custom theme index:", game.currentCustomThemeIndex);
+      console.log("Custom themes:", game.customThemes);
+
       const nextStage = getNextStage(game.currentStage);
       const nextDuration = getStageDuration(nextStage);
 
@@ -138,10 +142,8 @@ export default function PlayPage() {
         const nextRoundNumber = (game.currentRound || 1) + 1;
 
         // Check if we've reached the maximum number of rounds
-        if (nextRoundNumber > (game.maxRounds || 3)) {
+        if (nextRoundNumber > game.maxRounds) {
           // Game is over, show game over screen but don't redirect yet
-          // The GameOverStage component will handle the redirect after 10 seconds
-          // Make sure to preserve the hostId
           await db.transact(
             db.tx.games[game.id].update({
               currentStage: "GAME_OVER",
@@ -149,69 +151,89 @@ export default function PlayPage() {
               shouldRedirect: false,
               redirectPath: `/game/${params.id}/lobby`,
               // Make sure hostId is preserved
-              hostId: game.hostId || localStorage.getItem("UUID")
+              hostId: game.hostId || localStorage.getItem("UUID"),
+              customThemes: [],
             })
           );
         } else {
           // Continue to next round
           const currentNextRoundId = game.nextRoundId;
-          // Generate a new nextRoundId for the future round
           const futureRoundId = instantID();
-          // Generate a new acronym for the new round
           const newAcronym = getAcronym('pronounceable');
 
-          // Determine theme for next round based on settings
-          let nextRoundTheme = game.theme || "Things a pirate would say";
+          let nextRoundTheme = game.theme;
+          let nextCustomThemeIndex = (game.currentCustomThemeIndex || 0) + 1;
+          let usedStandardThemes = Array.isArray(game.usedStandardThemes) ? [...game.usedStandardThemes] : [];
 
-          if (game.useRandomThemes) {
-            // Check if we have custom themes
-            if (game.customThemes && game.customThemes.length > 0 && Math.random() > 0.7) {
-              // 30% chance to use a custom theme if available
-              const randomCustomIndex = Math.floor(Math.random() * game.customThemes.length);
-              nextRoundTheme = game.customThemes[randomCustomIndex];
+
+          if (!game.useRandomThemes) {
+            // Check if we have custom themes available and haven't used them all
+            if (Array.isArray(game.customThemes) &&
+              game.customThemes.length > 0 &&
+              nextCustomThemeIndex < game.customThemes.length) {
+
+              // Get the next custom theme
+              nextRoundTheme = game.customThemes[nextCustomThemeIndex];
+
+              // Increment for next round
+              nextCustomThemeIndex++;
             } else {
-              // Otherwise use a theme from the standard theme bank
-              nextRoundTheme = getRandomTheme();
+              // No more custom themes, use a random standard theme
+              const themeObject = getRandomTheme(usedStandardThemes);
+              const usedTheme = themeObject.theme;
+              const usedIndex = themeObject.index;
+              nextRoundTheme = usedTheme;
+              usedStandardThemes.push(usedIndex);
             }
           }
 
-          await db.transact([
-            // Create the new round
-            db.tx.round[currentNextRoundId].update({
-              id: currentNextRoundId,
-              gameId: game.id,
-              roundNumber: nextRoundNumber,
-              answers: [],
-              submittedPlayers: [],
-              votes: [],
-              theme: nextRoundTheme, // Use the determined theme
-              prompt: newAcronym,
-            }),
+          // Create a complete update object with all fields that need to be updated
+          const gameUpdateObject = {
+            currentStage: nextStage,
+            timerStart: Date.now(),
+            timeLeft: nextDuration,
+            isTimerRunning: true,
+            currentRound: nextRoundNumber,
+            answers: [],
+            submittedPlayers: [],
+            prompt: newAcronym,
+            nextRoundId: futureRoundId,
+            shouldRedirect: true,
+            redirectTo: `/game/${params.id}/play/${currentNextRoundId}`,
+            hostId: game.hostId,
+            theme: nextRoundTheme,
+            currentRoundTheme: nextRoundTheme,
+            currentCustomThemeIndex: nextCustomThemeIndex,
+            usedStandardThemes: usedStandardThemes
+          };
 
-            // Link the new round to the game
-            db.tx.games[game.id].link({
-              roundData: currentNextRoundId,
-            }),
+          try {
+            // Perform all updates in a single transaction
+            await db.transact([
+              // Create the new round
+              db.tx.round[currentNextRoundId].update({
+                id: currentNextRoundId,
+                gameId: game.id,
+                roundNumber: nextRoundNumber,
+                answers: [],
+                submittedPlayers: [],
+                votes: [],
+                theme: nextRoundTheme,
+                prompt: newAcronym,
+              }),
 
-            // Update game state for the new round and set the future nextRoundId
-            db.tx.games[game.id].update({
-              currentStage: nextStage,
-              timerStart: Date.now(),
-              timeLeft: nextDuration,
-              isTimerRunning: true,
-              currentRound: nextRoundNumber,
-              answers: [],
-              submittedPlayers: [],
-              prompt: newAcronym,
-              nextRoundId: futureRoundId,
-              shouldRedirect: true,
-              redirectTo: `/game/${params.id}/play/${currentNextRoundId}`,
-              // Preserve host ID when moving to next round
-              hostId: game.hostId,
-              // Update the current theme if using random themes
-              theme: game.useRandomThemes ? nextRoundTheme : game.theme
-            }),
-          ]);
+              // Link the new round to the game
+              db.tx.games[game.id].link({
+                roundData: currentNextRoundId,
+              }),
+
+              // Update the game with our complete object
+              db.tx.games[game.id].update(gameUpdateObject)
+            ]);
+
+          } catch (error) {
+            console.error("ERROR: Failed to update game state:", error);
+          }
         }
       } else {
         // For other stage transitions, just update the game state
@@ -221,7 +243,6 @@ export default function PlayPage() {
             timerStart: Date.now(),
             timeLeft: nextDuration,
             isTimerRunning: true,
-            // Preserve host ID during normal stage transitions
             hostId: game.hostId
           })
         );
@@ -277,13 +298,16 @@ export default function PlayPage() {
     const savedAnswer = typeof window !== 'undefined' ?
       localStorage.getItem(`answer_${params.id}_${game.currentRound || 1}`) : '';
 
+    // Use currentRoundTheme as the primary source, fallback to theme only if needed
+    const currentTheme = game.currentRoundTheme || game.theme || "Things a pirate would say";
+
     const commonProps = {
       currentRound: game.currentRound || 1,
       timeLeft: localTimeLeft ?? game.timeLeft,
-      theme: game.theme || "Things a pirate would say",
+      theme: currentTheme,
       prompt: game.prompt || "BBL",
       users: game.players || [],
-      submittedAnswer: savedAnswer, // Pass the saved answer to all stages
+      submittedAnswer: savedAnswer,
     };
 
     // Show waiting stage only for players who submitted during game stage

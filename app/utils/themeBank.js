@@ -49,10 +49,40 @@ const themeBank = [
     "Weird things to whisper in someone's ear"
 ];
 
-// Get a random theme from the bank
-export const getRandomTheme = () => {
-    const randomIndex = Math.floor(Math.random() * themeBank.length);
-    return themeBank[randomIndex];
+/**
+ * Get a random theme from the bank, avoiding previously used themes
+ * @param {Array} usedThemeIndices - Array of indices of themes that have already been used
+ * @returns {Object} - An object with the theme and its index
+ */
+export const getRandomTheme = (usedThemeIndices = []) => {
+    // Convert usedThemeIndices to a Set for faster lookups
+    const usedSet = new Set(usedThemeIndices);
+
+    // Get available indices (excluding used ones)
+    const availableIndices = [];
+    for (let i = 0; i < themeBank.length; i++) {
+        if (!usedSet.has(i)) {
+            availableIndices.push(i);
+        }
+    }
+
+    // If all themes have been used or there's an error, reset and use any theme
+    if (availableIndices.length === 0) {
+        const randomIndex = Math.floor(Math.random() * themeBank.length);
+        return {
+            theme: themeBank[randomIndex],
+            index: randomIndex
+        };
+    }
+
+    // Pick a random theme from the available ones
+    const randomAvailableIndex = Math.floor(Math.random() * availableIndices.length);
+    const selectedThemeIndex = availableIndices[randomAvailableIndex];
+
+    return {
+        theme: themeBank[selectedThemeIndex],
+        index: selectedThemeIndex
+    };
 };
 
 // Get all themes for selection

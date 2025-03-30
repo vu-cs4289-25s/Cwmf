@@ -1,4 +1,3 @@
-// Modified VotingStage.js with themed submit button
 "use client";
 
 import {
@@ -114,20 +113,6 @@ export default function VotingStage(props) {
     fetchRoundData();
   }, [roundId]);
 
-  // // Add debugging to understand what's happening with submissions
-  // useEffect(() => {
-  //   console.log("Current submissions:", submissions);
-  //   console.log("Current UUID:", localStorage.getItem("UUID"));
-
-  //   // Check if any submissions match the current user
-  //   const mySubmissions = submissions.filter(s => s.playerId === localStorage.getItem("UUID"));
-  //   console.log("My submissions:", mySubmissions);
-
-  //   // Check what submissions would be rendered
-  //   const visibleSubmissions = submissions.filter(s => s.playerId !== localStorage.getItem("UUID"));
-  //   console.log("Visible submissions:", visibleSubmissions);
-  // }, [submissions]);
-
   // Handle vote submission when time is up
   useEffect(() => {
     if (props.timeLeft === 0 && vote) {
@@ -207,11 +192,10 @@ export default function VotingStage(props) {
                     <div
                       key={submission.id || index}
                       ref={(el) => (submissionRefs.current[submission.id] = el)}
-                      className={`${
-                        submission.id === vote?.id
-                          ? "bg-hover-blue"
-                          : "bg-off-white"
-                      } w-3/4 rounded-md p-4 transition-colors`}
+                      className={`${submission.id === vote?.id
+                        ? "bg-hover-blue"
+                        : "bg-off-white"
+                        } w-3/4 rounded-md p-4 transition-colors`}
                     >
                       <p className="text-2xl font-sans text-primary-blue text-center mb-2">
                         {submission.answer}
@@ -229,8 +213,8 @@ export default function VotingStage(props) {
                             <button
                               key={name}
                               ref={(el) =>
-                                (emojiButtonRefs.current[submission.id][name] =
-                                  el)
+                              (emojiButtonRefs.current[submission.id][name] =
+                                el)
                               }
                               className="text-2xl hover:scale-110 transition-transform duration-150"
                               onClick={(e) => {

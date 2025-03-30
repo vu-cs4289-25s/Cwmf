@@ -212,19 +212,56 @@ export default function LobbyPage() {
     if (!gameData) return;
 
     try {
+      // Debug logs to verify settings
+      console.log("Starting game with custom themes:", customThemes);
+      console.log("Random themes enabled:", useRandomThemes);
+
       // Generate the first acronym
       const firstAcronym = getAcronym("pronounceable");
 
+      let usedStandardThemes = [];
+
       // Determine the theme for the first round
-      const allThemes = [...themeOptions, ...customThemes];
-      const firstRoundTheme = useRandomThemes
-        ? customThemes.length > 0 && Math.random() > 0.7
-          ? customThemes[Math.floor(Math.random() * customThemes.length)]
-          : getRandomTheme()
-        : selectedTheme;
+      let firstRoundTheme = selectedTheme;
+
+      if (customThemes.length > 0) {
+        firstRoundTheme = customThemes[0];
+      } else {
+        // If random themes but no custom themes, use random standard theme
+        const themeObject = getRandomTheme();
+        firstRoundTheme = themeObject.theme;
+        usedStandardThemes.push(themeObject.index);
+      }
 
       // Create the first round
       const firstRoundId = instantID();
+
+      // Prepare game state object
+      const gameStateObject = {
+        status: "active",
+        currentStage: "PREP",
+        currentRound: 1,
+        timerStart: Date.now(),
+        timeLeft: 5,
+        isTimerRunning: true,
+        answers: [],
+        scores: {},
+        theme: firstRoundTheme,
+        currentRoundTheme: firstRoundTheme,
+        prompt: firstAcronym,
+        maxRounds: maxRounds,
+        useRandomThemes: useRandomThemes,
+        customThemes: customThemes.length > 0 ? [...customThemes] : [],
+        currentCustomThemeIndex: 0,
+        usedStandardThemes: usedStandardThemes ? [...usedStandardThemes] : [],
+        hostId: localStorage.getItem("UUID"),
+      };
+
+      console.log(
+        "Initial game state:",
+        JSON.stringify(gameStateObject, null, 2)
+      );
+
       await db.transact([
         // Create the round
         db.tx.round[firstRoundId].update({
@@ -237,27 +274,17 @@ export default function LobbyPage() {
           theme: firstRoundTheme,
           prompt: firstAcronym,
         }),
+
+        // Link the round to the game
         db.tx.games[gameData.id].link({
           roundData: firstRoundId,
         }),
+
         // Update game state
-        db.tx.games[gameData.id].update({
-          status: "active",
-          currentStage: "PREP",
-          currentRound: 1,
-          timerStart: Date.now(),
-          timeLeft: 5,
-          isTimerRunning: true,
-          answers: [],
-          scores: {},
-          theme: firstRoundTheme,
-          prompt: firstAcronym,
-          maxRounds: maxRounds,
-          useRandomThemes: useRandomThemes,
-          customThemes: customThemes,
-          hostId: localStorage.getItem("UUID"), // Store host ID in the game document
-        }),
+        db.tx.games[gameData.id].update(gameStateObject),
       ]);
+
+      console.log("Game started with initial theme:", firstRoundTheme);
 
       // Redirect all players to the game with roundId
       await db.transact(
