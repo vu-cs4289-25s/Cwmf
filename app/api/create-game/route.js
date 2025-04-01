@@ -48,15 +48,24 @@ export async function POST(request) {
         ); */
 
     const gameId = id();
-    await db.transact(
+    const chatId = id();
+    await db.transact([
       db.tx.games[gameId].update({
         gameCode,
         status: "waiting",
         players: [],
         roundLength: 30,
         theme: "default",
-      })
-    );
+      }),
+
+      db.tx.chats[chatId].update({
+        gameId,
+      }),
+
+      db.tx.games[gameId].link({
+        chat: chatId,
+      }),
+    ]);
 
     const firstRoundId = id();
     // await db.transact(
@@ -72,12 +81,14 @@ export async function POST(request) {
     //     roundData: firstRoundId
     //   })
     // );
-    
 
-    return NextResponse.json({ 
-      game,
-      firstRoundId 
-    }, { status: 200 });
+    return NextResponse.json(
+      {
+        game,
+        firstRoundId,
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error creating game:", error);
     return NextResponse.json(
