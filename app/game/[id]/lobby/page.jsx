@@ -23,6 +23,9 @@ export default function LobbyPage() {
 
   const [userData, setUserData] = useState(null);
   const [gameData, setGameData] = useState({});
+  const [chatData, setChatData] = useState({});
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatMessage, setChatMessage] = useState("");
   const [maxRounds, setMaxRounds] = useState(2);
   const [selectedTheme, setSelectedTheme] = useState(getDefaultTheme());
   const [useRandomThemes, setUseRandomThemes] = useState(false);
@@ -36,6 +39,9 @@ export default function LobbyPage() {
 
   const { data, isLoading, error } = db.useQuery({
     games: {
+      chat: {
+        messages: {},
+      },
       $: {
         where: { gameCode: id },
       },
@@ -51,6 +57,12 @@ export default function LobbyPage() {
     if (data?.games?.length > 0) {
       const game = data.games[0];
       setGameData(game);
+
+      const chat = game.chat[0];
+      setChatData(chat);
+
+      const messages = chat.messages;
+      setChatMessages(messages);
 
       // Check if current player is the host and restore host status
       const currentPlayerId = localStorage.getItem("UUID");
@@ -300,6 +312,24 @@ export default function LobbyPage() {
     }
   };
 
+  const sendMessage = async (message) => {
+    try {
+      const res = await fetch("/api/send-message", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message,
+          sender: userData.name,
+          chatId: chatData.id,
+        }),
+      });
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
   if (!myPresence || !userData) {
     return <p>Loading...</p>;
   }
@@ -316,6 +346,43 @@ export default function LobbyPage() {
       </div>
 
       <div className="flex flex-1 justify-center items-center gap-20 px-8 -mt-75">
+        <div className="flex flex-col w-96 h-96 bg-white rounded-lg shadow-lg p-4 space-y-4">
+          <div className="font-sans text-lg text-primary-blue font-semibold">
+            Lobby Chat
+          </div>
+
+          <div
+            id="chat-box"
+            className="flex-1 overflow-y-auto border border-gray-300 rounded p-2 space-y-2"
+          >
+            {chatMessages &&
+              chatMessages.map((message, index) => (
+                <div key={index} className="text-sm text-gray-800">
+                  {message.sender}: {message.message}
+                </div>
+              ))}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="Type a message..."
+              className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+              value={chatMessage}
+              onChange={(e) => setChatMessage(e.target.value)}
+            />
+            <button
+              className="px-4 py-2 bg-primary-blue text-white text-sm rounded hover:bg-hover-blue"
+              onClick={() => {
+                sendMessage(chatMessage);
+                setChatMessage("");
+              }}
+            >
+              Send
+            </button>
+          </div>
+        </div>
+
         <div className="bg-off-white shadow-lg rounded-lg p-6 w-80">
           <h2 className="text-xl font-semibold mb-4 text-center font-sans tracking-wide text-primary-blue">
             game settings
