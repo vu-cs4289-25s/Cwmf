@@ -30,13 +30,13 @@ export async function POST(request, { params }) {
     }
     const game = queryData.games[0];
 
-    game.players.forEach((player) => {
-      if (player.name === user.name)
-        return NextResponse.json(
-          { error: "No duplicate names" },
-          { status: 400 }
-        );
-    });
+    const duplicate = game.players.find((player) => player.name === user.name);
+    if (duplicate) {
+      return NextResponse.json(
+        { error: "Duplicate name found" },
+        { status: 400 }
+      );
+    }
 
     let currentPlayers = [user, ...game.players];
 

@@ -21,7 +21,7 @@ async function joinGame(user) {
     }
     return data;
   } catch (error) {
-    console.error("Error joining game:", error);
+    return { error: error.message };
   }
 }
 
@@ -71,7 +71,11 @@ export default function AccountPage() {
       localStorage.setItem("host", user.host);
       localStorage.setItem("game", user.game);
 
-      await joinGame(user);
+      const result = await joinGame(user);
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
 
       router.push(`/game/${formData.code}/lobby`);
     } catch (error) {
@@ -83,7 +87,9 @@ export default function AccountPage() {
     <>
       <div className="flex min-h-screen flex-1 flex-col justify-center px-6 py-12 lg:px-8 bg-background-blue">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <h1 className="text-center text-8xl py-5 text-primary-blue font-sans">cwmf</h1>
+          <h1 className="text-center text-8xl py-5 text-primary-blue font-sans">
+            cwmf
+          </h1>
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
@@ -137,17 +143,15 @@ export default function AccountPage() {
               </div>
             </div>
 
-   
-              <div className="flex justify-center w-full">
-                <button
-                  type="submit"
-                  className="w-72 rounded-md bg-primary-blue px-3.5 py-2.5 text-2xl font-semibold font-sans text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 h-16 tracking-wide"
-                  //onClick={() => joinGame(formData.code, formData.username)}
-                >
-                  submit
-                </button>
-              </div>
-     
+            <div className="flex justify-center w-full">
+              <button
+                type="submit"
+                className="w-72 rounded-md bg-primary-blue px-3.5 py-2.5 text-2xl font-semibold font-sans text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 h-16 tracking-wide"
+                //onClick={() => joinGame(formData.code, formData.username)}
+              >
+                submit
+              </button>
+            </div>
           </form>
         </div>
       </div>
