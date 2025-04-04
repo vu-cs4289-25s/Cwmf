@@ -65,7 +65,7 @@ export default function ResultsStage(props) {
         </h1>
       </div>
 
-      <div className="flex flex-col mt-10 space-y-5 items-center justify-center pb-36">
+      <div className="flex flex-col mt-4 md:mt-10 space-y-5 overflow-y-auto flex-grow px-6 md:px-24 py-1 max-h-[300px] md:max-h-96">
         {isLoading ? (
           <div className="flex justify-center items-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-blue"></div>
@@ -74,18 +74,22 @@ export default function ResultsStage(props) {
           playerScores.map((player, index) => (
             <div
               key={index}
-              className={`bg-off-white w-3/4 rounded-lg p-3 flex flex-row justify-between ${index === 0 ? 'ring-2 ring-primary-blue' : ''}`}
+              className={`bg-off-white w-full rounded-lg p-2 md:p-3 flex flex-row justify-between ${
+                index === 0 ? "ring-2 ring-primary-blue" : ""
+              }`}
             >
-              <p className="font-sans text-2xl text-primary-blue">
+              <p className="font-sans text-lg md:text-2xl text-primary-blue">
                 {player.username}
               </p>
-              <p className="font-sans text-2xl text-primary-blue">
+              <p className="font-sans text-lg md:text-2xl text-primary-blue">
                 {player.votes}
               </p>
             </div>
           ))
         ) : (
-          <p className="text-xl text-gray-600">No votes recorded for this round yet.</p>
+          <p className="text-xl text-gray-600">
+            No votes recorded for this round yet.
+          </p>
         )}
       </div>
 
@@ -99,7 +103,8 @@ export default function ResultsStage(props) {
       </div>
 
       {/* Add Narrator component */}
-      <Narrator 
+
+      <Narrator
         stage="RESULTS"
         currentRound={props.currentRound}
         theme={props.theme}
