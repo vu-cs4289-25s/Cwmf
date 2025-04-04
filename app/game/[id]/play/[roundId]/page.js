@@ -102,6 +102,7 @@ export default function PlayPage() {
           await db.transact(
             db.tx.games[game.id].update({
               nextRoundId: newRoundId,
+              nextRoundId: newRoundId,
             })
           );
         }
@@ -245,6 +246,7 @@ export default function PlayPage() {
             timerStart: Date.now(),
             timeLeft: nextDuration,
             isTimerRunning: true,
+            // Preserve host ID during normal stage transitions
             hostId: game.hostId,
           })
         );
@@ -262,12 +264,20 @@ export default function PlayPage() {
       GAME: "VOTING", // Everyone goes to voting when time expires
       VOTING: "RESULTS",
       RESULTS: "PREP",
+      PREP: "GAME",
+      GAME: "VOTING", // Everyone goes to voting when time expires
+      VOTING: "RESULTS",
+      RESULTS: "PREP",
     };
     return stages[currentStage] || "PREP";
   };
 
   const getStageDuration = (stageName) => {
     const durations = {
+      PREP: 10000, // 5 seconds to prepare
+      GAME: 60, // 30 seconds to enter answer
+      VOTING: 60, // 15 seconds to vote
+      RESULTS: 100000, // 10 seconds to show results
       PREP: 10000, // 5 seconds to prepare
       GAME: 60, // 30 seconds to enter answer
       VOTING: 60, // 15 seconds to vote
@@ -285,9 +295,22 @@ export default function PlayPage() {
         `answer_${params.id}_${game.currentRound || 1}`,
         answer
       );
+      localStorage.setItem(
+        `answer_${params.id}_${game.currentRound || 1}`,
+        answer
+      );
 
       // Store answer in the database
       const updatedAnswers = [...(game.answers || []), answer];
+      await db.transact(
+        db.tx.games[game.id].update({
+          answers: updatedAnswers,
+          submittedPlayers: [
+            ...(game.submittedPlayers || []),
+            "currentPlayerId",
+          ],
+        })
+      );
       await db.transact(
         db.tx.games[game.id].update({
           answers: updatedAnswers,
@@ -337,6 +360,7 @@ export default function PlayPage() {
       case "PREP":
         return <PrepStage {...commonProps} />;
       case "GAME":
+        return <GameStage {...commonProps} handleSubmit={handleSubmitAnswer} />;
         return <GameStage {...commonProps} handleSubmit={handleSubmitAnswer} />;
       case "VOTING":
         return (
