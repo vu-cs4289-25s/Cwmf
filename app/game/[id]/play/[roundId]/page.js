@@ -337,10 +337,6 @@ export default function PlayPage() {
     const currentTheme =
       game.currentRoundTheme || game.theme || "Things a pirate would say";
 
-    // Use currentRoundTheme as the primary source, fallback to theme only if needed
-    const currentTheme =
-      game.currentRoundTheme || game.theme || "Things a pirate would say";
-
     const commonProps = {
       currentRound: game.currentRound || 1,
       timeLeft: localTimeLeft ?? game.timeLeft,
