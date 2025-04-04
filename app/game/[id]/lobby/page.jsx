@@ -339,21 +339,17 @@ export default function LobbyPage() {
       {/* Header section - responsive text sizes */}
       <div className="text-center pt-4 sm:pt-8 pb-0">
         <h1 className="text-center text-5xl sm:text-6xl md:text-7xl lg:text-8xl py-3 sm:py-5 text-primary-blue font-sans">
-      {/* Header section - responsive text sizes */}
-      <div className="text-center pt-4 sm:pt-8 pb-0">
-        <h1 className="text-center text-5xl sm:text-6xl md:text-7xl lg:text-8xl py-3 sm:py-5 text-primary-blue font-sans">
           cwmf
         </h1>
-        <h3 className="text-lg sm:text-xl md:text-2xl font-sans text-primary-blue">
         <h3 className="text-lg sm:text-xl md:text-2xl font-sans text-primary-blue">
           game code: {id}
         </h3>
       </div>
 
       <div className="flex flex-1 justify-center items-center gap-20 px-8 -mt-75">
-        <div className="flex flex-col w-96 h-96 bg-white rounded-lg shadow-lg p-4 space-y-4">
+        <div className="flex flex-col w-96 h-96 bg-off-white rounded-lg shadow-lg p-4 space-y-4">
           <div className="font-sans text-lg text-primary-blue font-semibold">
-            Lobby Chat
+            lobby chat
           </div>
 
           <div
@@ -626,23 +622,6 @@ export default function LobbyPage() {
           </div>
         </div>
 
-        {/* Players section - responsive grid */}
-        <div className="flex flex-col items-center">
-          <div className="grid grid-cols-3 gap-4 sm:gap-6 justify-center max-w-md">
-            {gameData?.players &&
-              typeof gameData.players === "object" &&
-              Object.entries(gameData?.players).map(([playerId, player]) => (
-                <div key={playerId} className="flex flex-col items-center">
-                  <div className="inline-flex items-center justify-center size-12 sm:size-16 rounded-full ring-2 ring-off-white bg-primary-blue text-off-white">
-                    <span className="text-base sm:text-lg font-sans font-bold">
-                      {player.name[0].toUpperCase()}
-                    </span>
-                  </div>
-                  <span className="mt-2 font-sans text-primary-blue text-sm sm:text-base truncate max-w-24">
-                    {player.name}
-                  </span>
-                </div>
-              ))}
         {/* Players section - responsive grid */}
         <div className="flex flex-col items-center">
           <div className="grid grid-cols-3 gap-4 sm:gap-6 justify-center max-w-md">

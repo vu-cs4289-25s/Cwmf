@@ -274,14 +274,14 @@ export default function PlayPage() {
 
   const getStageDuration = (stageName) => {
     const durations = {
-      PREP: 10000, // 5 seconds to prepare
+      PREP: 5, // 5 seconds to prepare
       GAME: 60, // 30 seconds to enter answer
       VOTING: 60, // 15 seconds to vote
-      RESULTS: 100000, // 10 seconds to show results
-      PREP: 10000, // 5 seconds to prepare
+      RESULTS: 10, // 10 seconds to show results
+      PREP: 5, // 5 seconds to prepare
       GAME: 60, // 30 seconds to enter answer
       VOTING: 60, // 15 seconds to vote
-      RESULTS: 100000, // 10 seconds to show results
+      RESULTS: 10, // 10 seconds to show results
     };
     return durations[stageName] || 30;
   };
