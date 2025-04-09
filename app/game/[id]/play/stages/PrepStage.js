@@ -14,7 +14,7 @@ export default function PrepStage(props) {
         <h1 className="text-center font-sans text-primary-blue text-4xl py-5">
           round {props.currentRound}
         </h1>
-        <h3 className="text-2xl font-sans text-primary-blue">
+        <h3 className="text-2xl px-4 font-sans text-primary-blue">
           theme: {props.theme.toLowerCase()}
         </h3>
       </div>
@@ -34,7 +34,7 @@ export default function PrepStage(props) {
       </div>
 
       {/* Add Narrator component */}
-      <Narrator 
+      <Narrator
         stage="PREP"
         currentRound={props.currentRound}
         theme={props.theme}

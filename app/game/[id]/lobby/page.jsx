@@ -346,50 +346,33 @@ export default function LobbyPage() {
         </h3>
       </div>
 
-      <div className="flex flex-1 justify-center items-center gap-20 px-8 -mt-75">
-        <div className="flex flex-col w-96 h-96 bg-off-white rounded-lg shadow-lg p-4 space-y-4">
-          <div className="font-sans text-lg text-primary-blue font-semibold">
-            lobby chat
-          </div>
-
-          <div
-            id="chat-box"
-            className="flex-1 overflow-y-auto border border-gray-300 rounded p-2 space-y-2"
-          >
-            {chatMessages &&
-              chatMessages.map((message, index) => (
-                <div
-                  key={index}
-                  className={`text-sm text-gray-800 ${
-                    message.sender === userData.name ? "font-bold" : ""
-                  }`}
-                >
-                  {message.timestamp} [{message.sender}]: {message.message}
+      {/* Players section - moved to top for mobile */}
+      <div className="px-4 py-6">
+        <h2 className="text-xl font-semibold mb-4 text-center font-sans tracking-wide text-primary-blue">
+          players
+        </h2>
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 justify-center max-w-4xl mx-auto">
+          {gameData?.players &&
+            typeof gameData.players === "object" &&
+            Object.entries(gameData?.players).map(([playerId, player]) => (
+              <div key={playerId} className="flex flex-col items-center">
+                <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-full ring-2 ring-off-white bg-primary-blue text-off-white">
+                  <span className="text-base sm:text-lg font-sans font-bold">
+                    {player.name[0].toUpperCase()}
+                  </span>
                 </div>
-              ))}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              placeholder="Type a message..."
-              className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
-              value={chatMessage}
-              onChange={(e) => setChatMessage(e.target.value)}
-            />
-            <button
-              className="px-4 py-2 bg-primary-blue text-white text-sm rounded hover:bg-hover-blue"
-              onClick={() => {
-                sendMessage(chatMessage);
-                setChatMessage("");
-              }}
-            >
-              Send
-            </button>
-          </div>
+                <span className="mt-2 font-sans text-primary-blue text-sm sm:text-base truncate max-w-24">
+                  {player.name}
+                </span>
+              </div>
+            ))}
         </div>
+      </div>
 
-        <div className="bg-off-white shadow-lg rounded-lg p-6 w-80">
+      {/* Main content - flex column on mobile, row on larger screens */}
+      <div className="flex flex-col md:flex-row justify-center items-stretch gap-6 px-4 md:px-8 pb-8">
+        {/* Game settings panel */}
+        <div className="bg-off-white shadow-lg rounded-lg p-6 w-full md:w-80">
           <h2 className="text-xl font-semibold mb-4 text-center font-sans tracking-wide text-primary-blue">
             game settings
           </h2>
@@ -627,23 +610,46 @@ export default function LobbyPage() {
           </div>
         </div>
 
-        {/* Players section - responsive grid */}
-        <div className="flex flex-col items-center">
-          <div className="grid grid-cols-3 gap-4 sm:gap-6 justify-center max-w-md">
-            {gameData?.players &&
-              typeof gameData.players === "object" &&
-              Object.entries(gameData?.players).map(([playerId, player]) => (
-                <div key={playerId} className="flex flex-col items-center">
-                  <div className="inline-flex items-center justify-center size-12 sm:size-16 rounded-full ring-2 ring-off-white bg-primary-blue text-off-white">
-                    <span className="text-base sm:text-lg font-sans font-bold">
-                      {player.name[0].toUpperCase()}
-                    </span>
-                  </div>
-                  <span className="mt-2 font-sans text-primary-blue text-sm sm:text-base truncate max-w-24">
-                    {player.name}
-                  </span>
+        {/* Lobby chat */}
+        <div className="flex flex-col w-full md:w-96 h-96 bg-off-white rounded-lg shadow-lg p-4 space-y-4">
+          <div className="font-sans text-lg text-primary-blue font-semibold">
+            lobby chat
+          </div>
+
+          <div
+            id="chat-box"
+            className="flex-1 overflow-y-auto border border-gray-300 rounded p-2 space-y-2"
+          >
+            {chatMessages &&
+              chatMessages.map((message, index) => (
+                <div
+                  key={index}
+                  className={`text-sm font-sans text-gray-600 ${
+                    message.sender === userData.name ? "font-bold" : ""
+                  }`}
+                >
+                  {message.timestamp} [{message.sender}]: {message.message}
                 </div>
               ))}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="Type a message..."
+              className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm font-sans text-gray-600"
+              value={chatMessage}
+              onChange={(e) => setChatMessage(e.target.value)}
+            />
+            <button
+              className="px-4 py-2 bg-primary-blue text-white text-sm font-sans rounded hover:bg-hover-blue"
+              onClick={() => {
+                sendMessage(chatMessage);
+                setChatMessage("");
+              }}
+            >
+              Send
+            </button>
           </div>
         </div>
       </div>
