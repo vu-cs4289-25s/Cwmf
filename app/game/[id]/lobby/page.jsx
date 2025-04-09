@@ -358,8 +358,13 @@ export default function LobbyPage() {
           >
             {chatMessages &&
               chatMessages.map((message, index) => (
-                <div key={index} className="text-sm text-gray-800">
-                  {message.sender}: {message.message}
+                <div
+                  key={index}
+                  className={`text-sm text-gray-800 ${
+                    message.sender === userData.name ? "font-bold" : ""
+                  }`}
+                >
+                  {message.timestamp} [{message.sender}]: {message.message}
                 </div>
               ))}
           </div>

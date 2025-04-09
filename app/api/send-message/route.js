@@ -13,6 +13,12 @@ export async function POST(request) {
     const { sender } = body;
     const { chatId } = body;
 
+    const now = new Date();
+    const timestamp = now.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+
     if (!message || !sender || !chatId) {
       return NextResponse.json(
         { error: "message, sender, and chatID are required" },
@@ -25,6 +31,7 @@ export async function POST(request) {
       db.tx.messages[messageId].update({
         message: message,
         sender: sender,
+        timestamp: timestamp,
       }),
 
       db.tx.messages[messageId].link({
