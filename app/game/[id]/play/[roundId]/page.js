@@ -275,9 +275,9 @@ export default function PlayPage() {
   const getStageDuration = (stageName) => {
     const durations = {
       PREP: 5, // 5 seconds to prepare
-      GAME: 60, // 30 seconds to enter answer
-      VOTING: 60, // 15 seconds to vote
-      RESULTS: 10, // 10 seconds to show results
+      GAME: 10000, // 30 seconds to enter answer
+      VOTING: 10000, // 15 seconds to vote
+      RESULTS: 10000, // 10 seconds to show results
       PREP: 5, // 5 seconds to prepare
       GAME: 60, // 30 seconds to enter answer
       VOTING: 60, // 15 seconds to vote

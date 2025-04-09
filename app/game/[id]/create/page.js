@@ -74,8 +74,8 @@ export default function AccountPage() {
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
           {error && (
-            <div className="mb-4 p-3 text-sm text-red-500 bg-red-100 rounded-md">
-              {error}
+            <div className="mb-4 p-3 text-md text-center font-sans text-red-500 bg-red-100 rounded-md">
+              {error.charAt(0).toUpperCase() + error.slice(1) + "."}
             </div>
           )}
 
