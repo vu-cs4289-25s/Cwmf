@@ -164,7 +164,7 @@ export default function VotingStage(props) {
             />
           )}
 
-          <div className="text-center pt-8 pb-0">
+          <div className="text-center pt-8 pb-0 px-4">
             <h1 className="text-center text-4xl py-5 font-sans text-primary-blue">
               Round {props.currentRound}
             </h1>
@@ -259,7 +259,7 @@ export default function VotingStage(props) {
                   );
                 })
               ) : (
-                <p className="text-xl text-gray-600">
+                <p className="text-xl font-sans text-gray-600">
                   No submissions for this round yet.
                 </p>
               )}
