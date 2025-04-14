@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import Narrator from "../../../../components/Narrator";
+import BackgroundMusic from "../../../../components/BackgroundMusic";
 
 export default function GameStage(props) {
   const [answer, setAnswer] = useState("");
@@ -171,6 +173,24 @@ export default function GameStage(props) {
           </div>
         </div>
       </div>
+
+      {/* Add Narrator component with singleLine set to false for periodic narration */}
+      <Narrator
+        stage="GAME"
+        currentRound={props.currentRound}
+        theme={props.theme}
+        prompt={props.prompt}
+        timeLeft={props.timeLeft}
+        submissions={[]}
+        singleLine={false}
+      />
+
+      {/* Add Background Music component */}
+      <BackgroundMusic
+        stage="GAME"
+        enabled={true}
+        volume={0.3}
+      />
     </div>
   );
 }

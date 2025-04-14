@@ -11,6 +11,7 @@ import Alert from "../../../../components/Alert";
 import Narrator from "../../../../components/Narrator";
 import { useParams } from "next/navigation";
 import { init, Cursors } from "@instantdb/react";
+import BackgroundMusic from "../../../../components/BackgroundMusic";
 
 const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
 const db = init({ appId: APP_ID });
@@ -135,7 +136,7 @@ export default function VotingStage(props) {
       if (ready) {
         setEmojiRefsReady(true);
       } else {
-        // Retry shortly in case refs weren’t set yet
+        // Retry shortly in case refs weren't set yet
         setTimeout(checkRefsReady, 50);
       }
     };
@@ -192,11 +193,10 @@ export default function VotingStage(props) {
                     <div
                       key={submission.id || index}
                       ref={(el) => (submissionRefs.current[submission.id] = el)}
-                      className={`${
-                        submission.id === vote?.id
-                          ? "bg-hover-blue"
-                          : "bg-off-white"
-                      } w-3/4 rounded-md p-4 transition-colors`}
+                      className={`${submission.id === vote?.id
+                        ? "bg-hover-blue"
+                        : "bg-off-white"
+                        } w-3/4 rounded-md p-4 transition-colors`}
                     >
                       <p className="text-2xl font-sans text-primary-blue text-center mb-2">
                         {submission.answer}
@@ -214,8 +214,8 @@ export default function VotingStage(props) {
                             <button
                               key={name}
                               ref={(el) =>
-                                (emojiButtonRefs.current[submission.id][name] =
-                                  el)
+                              (emojiButtonRefs.current[submission.id][name] =
+                                el)
                               }
                               className="text-2xl hover:scale-110 transition-transform duration-150"
                               onClick={(e) => {
@@ -286,7 +286,7 @@ export default function VotingStage(props) {
             </div>
           </div>
 
-          {/* Add Narrator component */}
+          {/* Add Narrator */}
           <Narrator
             stage="VOTING"
             currentRound={props.currentRound}
@@ -294,8 +294,16 @@ export default function VotingStage(props) {
             prompt={props.prompt}
             timeLeft={props.timeLeft}
             submissions={submissions}
+            singleLine={true}
           />
         </div>
+
+        {/* Add Background Music component */}
+        <BackgroundMusic
+          stage="VOTING"
+          enabled={true}
+          volume={0.3}
+        />
       </div>
     </Cursors>
   );

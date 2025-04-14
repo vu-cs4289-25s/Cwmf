@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Narrator from "../../../../components/Narrator";
+import BackgroundMusic from "../../../../components/BackgroundMusic";
 
 export default function ResultsStage(props) {
   const params = useParams();
@@ -74,9 +75,8 @@ export default function ResultsStage(props) {
           playerScores.map((player, index) => (
             <div
               key={index}
-              className={`bg-off-white w-full rounded-lg p-2 md:p-3 flex flex-row justify-between ${
-                index === 0 ? "ring-2 ring-primary-blue" : ""
-              }`}
+              className={`bg-off-white w-full rounded-lg p-2 md:p-3 flex flex-row justify-between ${index === 0 ? "ring-2 ring-primary-blue" : ""
+                }`}
             >
               <p className="font-sans text-lg md:text-2xl text-primary-blue">
                 {player.username}
@@ -102,15 +102,11 @@ export default function ResultsStage(props) {
         </div>
       </div>
 
-      {/* Add Narrator component */}
-
-      <Narrator
+      {/* Add Background Music component */}
+      <BackgroundMusic
         stage="RESULTS"
-        currentRound={props.currentRound}
-        theme={props.theme}
-        prompt={props.prompt}
-        timeLeft={props.timeLeft}
-        submissions={playerScores}
+        enabled={true}
+        volume={0.3}
       />
     </div>
   );
