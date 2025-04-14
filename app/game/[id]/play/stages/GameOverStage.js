@@ -1,6 +1,8 @@
 // app/game/[id]/stages/GameOverStage.js
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Narrator from "../../../../components/Narrator";
+import BackgroundMusic from "../../../../components/BackgroundMusic";
 
 export default function GameOverStage(props) {
     const router = useRouter();
@@ -97,6 +99,13 @@ export default function GameOverStage(props) {
 
     const { winners, highestScore, isTie } = calculateWinners();
 
+    // Create submissions array for Narrator
+    const playerScores = voteData && voteData.totalVoteCounts
+        ? Object.entries(voteData.totalVoteCounts)
+            .map(([username, votes]) => ({ username, votes }))
+            .sort((a, b) => b.votes - a.votes)
+        : [];
+
     return (
         <div className="flex h-screen flex-col bg-background-blue">
             <div className="text-center pt-8 pb-0">
@@ -177,6 +186,13 @@ export default function GameOverStage(props) {
                     Returning to lobby in {secondsLeft} seconds...
                 </p>
             </div>
+
+            {/* Add Background Music component */}
+            <BackgroundMusic
+                stage="GAME_OVER"
+                enabled={true}
+                volume={0.3}
+            />
         </div>
     );
 }

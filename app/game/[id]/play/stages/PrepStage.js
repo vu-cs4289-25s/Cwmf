@@ -1,5 +1,4 @@
 import React from "react";
-import Narrator from "../../../../components/Narrator";
 
 export default function PrepStage(props) {
   const formatTime = (seconds) => {
@@ -32,15 +31,6 @@ export default function PrepStage(props) {
           </div>
         </div>
       </div>
-
-      {/* Add Narrator component */}
-      <Narrator
-        stage="PREP"
-        currentRound={props.currentRound}
-        theme={props.theme}
-        prompt={props.prompt}
-        timeLeft={props.timeLeft}
-      />
     </div>
   );
 }

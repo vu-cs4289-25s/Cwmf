@@ -254,7 +254,7 @@ export default function LobbyPage() {
         currentStage: "PREP",
         currentRound: 1,
         timerStart: Date.now(),
-        timeLeft: 5,
+        timeLeft: 10,
         isTimerRunning: true,
         answers: [],
         scores: {},
@@ -381,7 +381,7 @@ export default function LobbyPage() {
               <label className="block text-primary-blue mb-2 font-sans">
                 round time
               </label>
-              <p className="font-sans text-gray-600">30 seconds</p>
+              <p className="font-sans text-gray-600">60 seconds</p>
             </div>
 
             {/* Theme selection */}

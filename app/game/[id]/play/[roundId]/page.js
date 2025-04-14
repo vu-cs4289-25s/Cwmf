@@ -130,11 +130,6 @@ export default function PlayPage() {
     setIsTransitioning(true);
 
     try {
-      // Log current state for debugging
-      console.log("Current game theme:", game.theme);
-      console.log("Current custom theme index:", game.currentCustomThemeIndex);
-      console.log("Custom themes:", game.customThemes);
-
       const nextStage = getNextStage(game.currentStage);
       const nextDuration = getStageDuration(nextStage);
 
@@ -264,24 +259,17 @@ export default function PlayPage() {
       GAME: "VOTING", // Everyone goes to voting when time expires
       VOTING: "RESULTS",
       RESULTS: "PREP",
-      PREP: "GAME",
-      GAME: "VOTING", // Everyone goes to voting when time expires
-      VOTING: "RESULTS",
-      RESULTS: "PREP",
     };
     return stages[currentStage] || "PREP";
   };
 
   const getStageDuration = (stageName) => {
+    // TO CHANGE THE TIMING OF THE FIRST PREP STAGE, CHANGE THE INITIAL TIME IN THE LOBBY PAGE ON GAME CREATION
     const durations = {
-      PREP: 5, // 5 seconds to prepare
-      GAME: 10000, // 30 seconds to enter answer
-      VOTING: 10000, // 15 seconds to vote
-      RESULTS: 10000, // 10 seconds to show results
-      PREP: 5, // 5 seconds to prepare
-      GAME: 60, // 30 seconds to enter answer
-      VOTING: 60, // 15 seconds to vote
-      RESULTS: 10, // 10 seconds to show results
+      PREP: 10,
+      GAME: 60,
+      VOTING: 60,
+      RESULTS: 10,
     };
     return durations[stageName] || 30;
   };
@@ -356,7 +344,6 @@ export default function PlayPage() {
       case "PREP":
         return <PrepStage {...commonProps} />;
       case "GAME":
-        return <GameStage {...commonProps} handleSubmit={handleSubmitAnswer} />;
         return <GameStage {...commonProps} handleSubmit={handleSubmitAnswer} />;
       case "VOTING":
         return (

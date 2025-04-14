@@ -1,4 +1,6 @@
 import React from "react";
+import Narrator from "../../../../components/Narrator";
+import BackgroundMusic from "../../../../components/BackgroundMusic";
 
 export default function WaitingStage(props) {
   const formatTime = (seconds) => {
@@ -44,6 +46,13 @@ export default function WaitingStage(props) {
           </div>
         </div>
       </div>
+
+      {/* Add Background Music component */}
+      <BackgroundMusic
+        stage="default"
+        enabled={true}
+        volume={0.3}
+      />
     </div>
   );
 }
