@@ -184,6 +184,12 @@ export default function PlayPage() {
               nextRoundTheme = usedTheme;
               usedStandardThemes.push(usedIndex);
             }
+          } else {
+            const themeObject = getRandomTheme(usedStandardThemes);
+            const usedTheme = themeObject.theme;
+            const usedIndex = themeObject.index;
+            nextRoundTheme = usedTheme;
+            usedStandardThemes.push(usedIndex);
           }
 
           // Create a complete update object with all fields that need to be updated
