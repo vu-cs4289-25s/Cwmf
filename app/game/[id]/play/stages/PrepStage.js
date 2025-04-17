@@ -1,4 +1,5 @@
 import React from "react";
+import BackgroundMusic from "../../../../components/BackgroundMusic";
 
 export default function PrepStage(props) {
   const formatTime = (seconds) => {
