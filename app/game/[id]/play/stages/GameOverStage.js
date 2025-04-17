@@ -191,7 +191,7 @@ export default function GameOverStage(props) {
             <BackgroundMusic
                 stage="GAME_OVER"
                 enabled={true}
-                volume={0.3}
+                volume={0.2}
             />
         </div>
     );

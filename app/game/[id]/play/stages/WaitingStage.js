@@ -51,7 +51,7 @@ export default function WaitingStage(props) {
       <BackgroundMusic
         stage="default"
         enabled={true}
-        volume={0.3}
+        volume={0.2}
       />
     </div>
   );

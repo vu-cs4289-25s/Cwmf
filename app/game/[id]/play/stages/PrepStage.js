@@ -1,4 +1,5 @@
 import React from "react";
+import BackgroundMusic from "../../../../components/BackgroundMusic";
 
 export default function PrepStage(props) {
   const formatTime = (seconds) => {
@@ -31,6 +32,14 @@ export default function PrepStage(props) {
           </div>
         </div>
       </div>
+
+      {/* Add Background Music component */}
+      <BackgroundMusic
+        stage="default"
+        enabled={true}
+        volume={0.2}
+      />
+
     </div>
   );
 }
