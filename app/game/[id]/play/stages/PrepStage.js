@@ -31,6 +31,13 @@ export default function PrepStage(props) {
           </div>
         </div>
       </div>
+
+      {/* Add Background Music component */}
+      <BackgroundMusic
+        stage="default"
+        enabled={true}
+        volume={0.2}
+      />
     </div>
   );
 }
