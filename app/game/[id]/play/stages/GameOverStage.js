@@ -1,8 +1,8 @@
 // app/game/[id]/stages/GameOverStage.js
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import Narrator from "../../../../components/Narrator";
 import BackgroundMusic from "../../../../components/BackgroundMusic";
+import musicService from "../../../../utils/musicService";
 
 export default function GameOverStage(props) {
     const router = useRouter();
@@ -53,6 +53,9 @@ export default function GameOverStage(props) {
         // Redirect when timer reaches zero
         const redirectTimer = setTimeout(() => {
             if (props.redirectPath) {
+                if (musicService) {
+                    musicService.stopAllMusic();
+                }
                 // Make sure host status is preserved before redirecting
                 if (isHost === "true") {
                     localStorage.setItem("host", "true");
@@ -191,7 +194,7 @@ export default function GameOverStage(props) {
             <BackgroundMusic
                 stage="GAME_OVER"
                 enabled={true}
-                volume={0.3}
+                volume={0.2}
             />
         </div>
     );

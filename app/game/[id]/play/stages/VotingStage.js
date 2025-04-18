@@ -302,7 +302,7 @@ export default function VotingStage(props) {
         <BackgroundMusic
           stage="VOTING"
           enabled={true}
-          volume={0.3}
+          volume={0.2}
         />
       </div>
     </Cursors>

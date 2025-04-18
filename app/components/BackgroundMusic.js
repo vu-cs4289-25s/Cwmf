@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import musicService from "../utils/musicService";
 
-const BackgroundMusic = ({ stage, enabled = true, volume = 0.3 }) => {
+const BackgroundMusic = ({ stage, enabled = true, volume = 0.2 }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
     const [currentVolume, setCurrentVolume] = useState(volume);

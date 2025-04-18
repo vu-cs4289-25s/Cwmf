@@ -49,6 +49,42 @@ class MusicService {
         }
     }
 
+    stopAllMusic() {
+        try {
+            console.log("Stopping all music");
+
+            // First stop the current track if any
+            if (this.currentAudio) {
+                try {
+                    this.currentAudio.pause();
+                    this.currentAudio.currentTime = 0;
+                    this.currentAudio = null;
+                } catch (error) {
+                    console.error("Error stopping current track:", error);
+                }
+            }
+
+            // Then go through all loaded tracks and pause them
+            Object.values(this.tracks).forEach(audio => {
+                if (audio) {
+                    try {
+                        audio.pause();
+                        audio.currentTime = 0;
+                    } catch (error) {
+                        console.error("Error stopping track:", error);
+                    }
+                }
+            });
+
+            // Update the enabled state but persist the setting
+            this.isEnabled = false;
+
+            console.log("All music stopped");
+        } catch (error) {
+            console.error("Error in stopAllMusic:", error);
+        }
+    }
+
     // Preload all audio files
     preloadAllTracks() {
         if (typeof window === 'undefined') return; // Skip in SSR

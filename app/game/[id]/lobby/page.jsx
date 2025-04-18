@@ -54,6 +54,10 @@ export default function LobbyPage() {
   }, []);
 
   useEffect(() => {
+    if (window.musicService) {
+      window.musicService.setEnabled(true);
+    }
+
     if (data?.games?.length > 0) {
       const game = data.games[0];
       setGameData(game);
