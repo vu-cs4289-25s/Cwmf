@@ -1,4 +1,4 @@
-import { init} from "@instantdb/admin";
+import { init } from "@instantdb/admin";
 import { NextResponse } from 'next/server';
 
 const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
@@ -30,7 +30,7 @@ export async function GET(request) {
                 },
             },
         };
-        
+
         const gameIdData = await db.query(gameIdQuery);
 
         if (!gameIdData?.games?.[0]) {
@@ -52,7 +52,7 @@ export async function GET(request) {
                 round: {},
             },
         };
-        
+
         const votesData = await db.query(votesQuery);
 
         if (!votesData?.round || votesData.round.length === 0) {
@@ -65,22 +65,22 @@ export async function GET(request) {
         // Get all votes across all rounds
         const allRounds = votesData.round;
         const allVotes = allRounds.flatMap(round => round.votes || []);
-        
+
         // Create a hashmap to count total votes for each player
         const totalVoteCountMap = {};
-        
+
         // Initialize with 0 for all players in the game
         playersData.forEach(player => {
             totalVoteCountMap[player.name] = 0;
         });
-        
+
         // Initialize with 0 for any voters not in players list
         allVotes.forEach(vote => {
             if (!totalVoteCountMap.hasOwnProperty(vote.voter)) {
                 totalVoteCountMap[vote.voter] = 0;
             }
         });
-        
+
         // Count total votes
         allVotes.forEach(vote => {
             if (totalVoteCountMap.hasOwnProperty(vote.votedFor)) {
@@ -89,34 +89,42 @@ export async function GET(request) {
                 totalVoteCountMap[vote.votedFor] = 1;
             }
         });
-        
+
         // Prepare response
         const response = {
             totalVotes: allVotes,
             totalVoteCounts: totalVoteCountMap
         };
-        
+
         // If roundId is specified, add round-specific data
         if (roundId) {
             const specificRound = allRounds.find(round => round.id === roundId);
-            
+
             if (!specificRound) {
                 return NextResponse.json(
                     { error: 'Round not found' },
                     { status: 404 }
                 );
             }
-            
+
             const roundVotes = specificRound.votes || [];
-            
+
+            // Get unique voters for this round
+            const uniqueVoters = new Set();
+            roundVotes.forEach(vote => {
+                if (vote.voter) {
+                    uniqueVoters.add(vote.voter);
+                }
+            });
+
             // Create a hashmap to count round-specific votes
             const roundVoteCountMap = {};
-            
+
             // Initialize with 0 for all players in the game
             playersData.forEach(player => {
                 roundVoteCountMap[player.name] = 0;
             });
-            
+
             // Count round-specific votes
             roundVotes.forEach(vote => {
                 if (roundVoteCountMap.hasOwnProperty(vote.votedFor)) {
@@ -125,13 +133,14 @@ export async function GET(request) {
                     roundVoteCountMap[vote.votedFor] = 1;
                 }
             });
-            
+
             // Add round-specific data to response
             response.roundId = roundId;
             response.roundVotes = roundVotes;
             response.roundVoteCounts = roundVoteCountMap;
+            response.uniqueVoterCount = uniqueVoters.size; // Add this for easier tracking
         }
-        
+
         return NextResponse.json(response);
     } catch (error) {
         console.error('Error querying votes:', error);

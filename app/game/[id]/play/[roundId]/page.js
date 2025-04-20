@@ -22,6 +22,7 @@ export default function PlayPage() {
   const [localTimeLeft, setLocalTimeLeft] = useState(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [allPlayersSubmitted, setAllPlayersSubmitted] = useState(false);
+  const [allPlayersVoted, setAllPlayersVoted] = useState(false);
 
   // Subscribe to game state
   const { data } = db.useQuery({
@@ -165,6 +166,41 @@ export default function PlayPage() {
     }
   }, [game?.submittedPlayers, game?.players, game?.currentStage, game?.currentRound]);
 
+  useEffect(() => {
+    // Only apply to VOTING stage and don't run if already transitioning
+    if (!game || game.currentStage !== "VOTING" || isTransitioning) return;
+
+    // Get total player count
+    const totalPlayers = Array.isArray(game.players) ? game.players.length : 0;
+
+    // Get voted player count
+    const votedPlayers = Array.isArray(game.votedPlayers) ? game.votedPlayers.length : 0;
+
+    console.log(`[Round ${game.currentRound || 1}] Votes: ${votedPlayers}/${totalPlayers} players have voted`);
+
+    // Check if all players have voted
+    const allVoted = totalPlayers > 0 && votedPlayers >= totalPlayers;
+    setAllPlayersVoted(allVoted); // Use the new state variable
+
+    // If all players have voted and we're not already transitioning, trigger transition
+    if (allVoted && !isTransitioning) {
+      console.log(`[Round ${game.currentRound || 1}] All players have voted, transitioning early...`);
+
+      // Set transitioning flag to prevent multiple timers
+      setIsTransitioning(true);
+
+      // Delay transition by 2 seconds
+      const transitionTimer = setTimeout(() => {
+        handleStageComplete();
+        setTimeout(() => {
+          setIsTransitioning(false);
+        }, 500);
+      }, 2000);
+
+      return () => clearTimeout(transitionTimer);
+    }
+  }, [game?.votedPlayers, game?.players, game?.currentStage, game?.currentRound]);
+
   // Reset submission state when entering a new round
   useEffect(() => {
     if (game?.currentStage === "PREP") {
@@ -172,6 +208,12 @@ export default function PlayPage() {
       setAllPlayersSubmitted(false);
     }
   }, [game?.currentStage, game?.currentRound]);
+
+  useEffect(() => {
+    if (game?.currentStage === "GAME") {
+      setAllPlayersVoted(false);
+    }
+  }, [game?.currentStage]);
 
   const handleStageComplete = async () => {
     if (!game || isTransitioning) return;
@@ -182,8 +224,18 @@ export default function PlayPage() {
       const nextStage = getNextStage(game.currentStage);
       const nextDuration = getStageDuration(nextStage);
 
-      // Check if we're transitioning from RESULTS to PREP (new round)
-      if (game.currentStage === "RESULTS") {
+      if (game.currentStage === "VOTING") {
+        await db.transact(
+          db.tx.games[game.id].update({
+            currentStage: nextStage,
+            timerStart: Date.now(),
+            timeLeft: nextDuration,
+            isTimerRunning: true,
+            votedPlayers: [], // Reset voted players
+            hostId: game.hostId,
+          })
+        );
+      } else if (game.currentStage === "RESULTS") {
         const nextRoundNumber = (game.currentRound || 1) + 1;
 
         // Check if we've reached the maximum number of rounds
@@ -250,6 +302,7 @@ export default function PlayPage() {
             currentRound: nextRoundNumber,
             answers: [],
             submittedPlayers: [],
+            votedPlayers: [],
             prompt: newAcronym,
             nextRoundId: futureRoundId,
             shouldRedirect: true,
@@ -296,7 +349,6 @@ export default function PlayPage() {
             timerStart: Date.now(),
             timeLeft: nextDuration,
             isTimerRunning: true,
-            // Preserve host ID during normal stage transitions
             hostId: game.hostId,
           })
         );
@@ -413,9 +465,11 @@ export default function PlayPage() {
             {...commonProps}
             answers={game.answers || []}
             showNoSubmissionAlert={!hasSubmitted}
+            allPlayersVoted={allPlayersVoted} // Use the new state variable
+            votedPlayersCount={Array.isArray(game.votedPlayers) ? game.votedPlayers.length : 0}
+            totalPlayers={Array.isArray(game.players) ? game.players.length : 0}
             handleVote={(vote) => {
               console.log(vote);
-              handleStageComplete();
             }}
           />
         );

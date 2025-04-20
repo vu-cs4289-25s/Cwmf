@@ -53,16 +53,21 @@ export default function VotingStage(props) {
         voter: localUser,
         votedFor: vote.playerId,
         roundId: roundId,
+        gameCode: gameCode, // Add this line
       };
       console.log(voteData);
 
-      await fetch("/api/submit-vote", {
+      const response = await fetch("/api/submit-vote", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ voteData }),
       });
+
+      if (response.ok) {
+        setHasVoted(true);
+      }
     } catch (error) {
       console.error("Error submitting vote:", error);
     }
@@ -280,6 +285,15 @@ export default function VotingStage(props) {
           {/* Fixed bottom section with timer */}
           <div className="fixed bottom-0 left-0 right-0 bg-off-white">
             <div className="max-w-md mx-auto flex flex-col items-center p-4">
+              {props.allPlayersVoted ? (
+                <p className="text-gray-600 font-sans text-xl text-center mb-1">
+                  All players have voted! Advancing shortly...
+                </p>
+              ) : props.votedPlayersCount !== undefined && props.totalPlayers !== undefined ? (
+                <p className="text-gray-600 font-sans text-xl text-center mb-1">
+                  Votes: {props.votedPlayersCount}/{props.totalPlayers}
+                </p>
+              ) : null}
               <div className="text-6xl font-bold font-sans text-primary-blue">
                 {formatTime(props.timeLeft)}
               </div>
