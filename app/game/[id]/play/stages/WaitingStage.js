@@ -1,3 +1,4 @@
+// In WaitingStage.js
 import React from "react";
 import Narrator from "../../../../components/Narrator";
 import BackgroundMusic from "../../../../components/BackgroundMusic";
@@ -8,6 +9,9 @@ export default function WaitingStage(props) {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
+
+  // We'll get this prop from the parent component instead of querying here
+  const { allPlayersSubmitted } = props;
 
   return (
     <div className="flex h-screen flex-col bg-background-blue">
@@ -38,9 +42,15 @@ export default function WaitingStage(props) {
       {/* Fixed bottom section with timer */}
       <div className="justify-self-end w-full p-6 h-36 bg-off-white">
         <div className="max-w-md mx-auto flex flex-col items-center">
-          <p className="text-gray-600 font-sans text-2xl text-center">
-            Waiting for others to submit...
-          </p>
+          {allPlayersSubmitted ? (
+            <p className="text-gray-600 font-sans text-2xl text-center mb-2">
+              All submitted! Advancing shortly...
+            </p>
+          ) : (
+            <p className="text-gray-600 font-sans text-2xl text-center">
+              Waiting for others to submit...
+            </p>
+          )}
           <div className="text-6xl font-bold text-primary-blue font-sans">
             {formatTime(props.timeLeft)}
           </div>

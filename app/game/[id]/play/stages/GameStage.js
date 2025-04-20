@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { init } from "@instantdb/react";
 import { useParams } from "next/navigation";
 import Narrator from "../../../../components/Narrator";
 import BackgroundMusic from "../../../../components/BackgroundMusic";
+
+const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID;
+const db = init({ appId: APP_ID });
 
 export default function GameStage(props) {
   const [answer, setAnswer] = useState("");
@@ -58,7 +62,7 @@ export default function GameStage(props) {
       }
 
       setSubmittedAnswer(answerText);
-      props.handleSubmit(answerText); // Call the parent handler if needed
+      props.handleSubmit(answerText, playerId); // Pass the playerId to the parent
     } catch (error) {
       console.error("Error submitting answer:", error);
     }

@@ -21,6 +21,7 @@ export default function PlayPage() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [localTimeLeft, setLocalTimeLeft] = useState(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [allPlayersSubmitted, setAllPlayersSubmitted] = useState(false);
 
   // Subscribe to game state
   const { data } = db.useQuery({
@@ -123,6 +124,54 @@ export default function PlayPage() {
       }
     }
   }, [data, router]);
+
+  useEffect(() => {
+    if (!game) return;
+
+    // Only check for auto-transition in GAME stage
+    if (game.currentStage !== "GAME") return;
+
+    // Get total player count (ensure we're accessing the array correctly)
+    const totalPlayers = Array.isArray(game.players) ? game.players.length : 0;
+
+    // Get submitted player count
+    const submittedPlayers = Array.isArray(game.submittedPlayers) ? game.submittedPlayers.length : 0;
+
+    console.log(`[Round ${game.currentRound || 1}] Checking submissions: ${submittedPlayers}/${totalPlayers} players have submitted`);
+    console.log("Submitted player IDs:", game.submittedPlayers);
+    console.log("All player IDs:", game.players.map(p => p.id || p.UUID));
+
+    // Check if all players have submitted
+    const allSubmitted = totalPlayers > 0 && submittedPlayers >= totalPlayers;
+    setAllPlayersSubmitted(allSubmitted);
+
+    // If all players have submitted and we're not already transitioning, trigger transition
+    if (allSubmitted && !isTransitioning) {
+      console.log(`[Round ${game.currentRound || 1}] All players have submitted, transitioning early...`);
+
+      // Set transitioning flag to prevent multiple timers
+      setIsTransitioning(true);
+
+      // Delay transition by 2 seconds
+      const transitionTimer = setTimeout(() => {
+        handleStageComplete();
+        // Reset transitioning flag after completion
+        setTimeout(() => {
+          setIsTransitioning(false);
+        }, 500); // Add a small delay before resetting the flag
+      }, 2000);
+
+      return () => clearTimeout(transitionTimer);
+    }
+  }, [game?.submittedPlayers, game?.players, game?.currentStage, game?.currentRound]);
+
+  // Reset submission state when entering a new round
+  useEffect(() => {
+    if (game?.currentStage === "PREP") {
+      setHasSubmitted(false);
+      setAllPlayersSubmitted(false);
+    }
+  }, [game?.currentStage, game?.currentRound]);
 
   const handleStageComplete = async () => {
     if (!game || isTransitioning) return;
@@ -284,40 +333,46 @@ export default function PlayPage() {
     if (!game) return;
 
     if (answer !== "") {
+      // Get the current player's ID
+      const playerId = localStorage.getItem("UUID");
+      console.log("Current player submitting:", playerId);
+
       // Store in localStorage
       localStorage.setItem(
         `answer_${params.id}_${game.currentRound || 1}`,
         answer
       );
-      localStorage.setItem(
-        `answer_${params.id}_${game.currentRound || 1}`,
-        answer
-      );
 
-      // Store answer in the database
-      const updatedAnswers = [...(game.answers || []), answer];
-      await db.transact(
-        db.tx.games[game.id].update({
-          answers: updatedAnswers,
-          submittedPlayers: [
-            ...(game.submittedPlayers || []),
-            "currentPlayerId",
-          ],
-        })
-      );
-      await db.transact(
-        db.tx.games[game.id].update({
-          answers: updatedAnswers,
-          submittedPlayers: [
-            ...(game.submittedPlayers || []),
-            "currentPlayerId",
-          ],
-        })
-      );
+      // Get current submitted players list
+      const currentSubmittedPlayers = Array.isArray(game.submittedPlayers)
+        ? [...game.submittedPlayers]
+        : [];
+
+      console.log("Current submitted players:", currentSubmittedPlayers);
+
+      // Only add player if they haven't already submitted
+      if (!currentSubmittedPlayers.includes(playerId)) {
+        // Store answer in the database
+        const updatedAnswers = Array.isArray(game.answers)
+          ? [...game.answers, answer]
+          : [answer];
+
+        try {
+          await db.transact(
+            db.tx.games[game.id].update({
+              answers: updatedAnswers,
+              submittedPlayers: [...currentSubmittedPlayers, playerId],
+            })
+          );
+          console.log(`Player ${playerId} submitted answer. New submissions: ${[...currentSubmittedPlayers, playerId]}`);
+        } catch (error) {
+          console.error("Error updating game with submission:", error);
+        }
+      }
+
       setHasSubmitted(true);
     }
   };
-
   const renderStage = () => {
     if (!game) return <div>Loading...</div>;
 
@@ -338,6 +393,7 @@ export default function PlayPage() {
       prompt: game.prompt || "BBL",
       users: game.players || [],
       submittedAnswer: savedAnswer,
+      allPlayersSubmitted: allPlayersSubmitted, // Pass this new prop
     };
 
     // Show waiting stage only for players who submitted during game stage
