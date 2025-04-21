@@ -170,7 +170,7 @@ export default function VotingStage(props) {
           )}
 
           <div className="text-center pt-8 pb-0 px-4">
-            <h1 className="text-center text-4xl py-5 font-sans text-primary-blue">
+            <h1 className="text-center text-4xl mt-16 py-5 font-sans text-primary-blue">
               Round {props.currentRound}
             </h1>
             <h3 className="text-2xl font-sans text-primary-blue">
@@ -188,7 +188,9 @@ export default function VotingStage(props) {
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-blue"></div>
             </div>
           ) : (
-            <div className="flex flex-col mt-10 space-y-5 items-center justify-center pb-32">
+            <div
+              className={`flex flex-col mt-3 space-y-5 items-center justify-center pb-32`}
+            >
               {submissions.length > 0 ? (
                 submissions.map((submission, index) => {
                   const isOwnSubmission =
@@ -198,10 +200,15 @@ export default function VotingStage(props) {
                     <div
                       key={submission.id || index}
                       ref={(el) => (submissionRefs.current[submission.id] = el)}
-                      className={`${submission.id === vote?.id
-                        ? "bg-hover-blue"
-                        : "bg-off-white"
-                        } w-3/4 rounded-md p-4 transition-colors`}
+                      className={`${
+                        submission.id === vote?.id
+                          ? "bg-hover-blue"
+                          : "bg-off-white"
+                      } w-3/4 rounded-md p-4 transition-colors ${
+                        hasVoted && vote === submission
+                          ? "border-4 border-primary-blue"
+                          : ""
+                      }`}
                     >
                       <p className="text-2xl font-sans text-primary-blue text-center mb-2">
                         {submission.answer}
@@ -219,8 +226,8 @@ export default function VotingStage(props) {
                             <button
                               key={name}
                               ref={(el) =>
-                              (emojiButtonRefs.current[submission.id][name] =
-                                el)
+                                (emojiButtonRefs.current[submission.id][name] =
+                                  el)
                               }
                               className="text-2xl hover:scale-110 transition-transform duration-150"
                               onClick={(e) => {
@@ -252,7 +259,7 @@ export default function VotingStage(props) {
                       </div>
 
                       {/* Voting button (only for others) */}
-                      {!isOwnSubmission && (
+                      {!isOwnSubmission && !hasVoted && (
                         <button
                           onClick={() => setVote(submission)}
                           className="mt-3 w-full rounded-md bg-primary-blue py-2 text-off-white text-xl font-semibold hover:bg-hover-blue transition-colors"
@@ -289,7 +296,8 @@ export default function VotingStage(props) {
                 <p className="text-gray-600 font-sans text-xl text-center mb-1">
                   All players have voted! Advancing shortly...
                 </p>
-              ) : props.votedPlayersCount !== undefined && props.totalPlayers !== undefined ? (
+              ) : props.votedPlayersCount !== undefined &&
+                props.totalPlayers !== undefined ? (
                 <p className="text-gray-600 font-sans text-xl text-center mb-1">
                   Votes: {props.votedPlayersCount}/{props.totalPlayers}
                 </p>
@@ -313,11 +321,7 @@ export default function VotingStage(props) {
         </div>
 
         {/* Add Background Music component */}
-        <BackgroundMusic
-          stage="VOTING"
-          enabled={true}
-          volume={0.2}
-        />
+        <BackgroundMusic stage="VOTING" enabled={true} volume={0.2} />
       </div>
     </Cursors>
   );

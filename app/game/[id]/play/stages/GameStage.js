@@ -109,15 +109,15 @@ export default function GameStage(props) {
   return (
     <div className="flex h-screen flex-col bg-background-blue">
       <div className="text-center pt-8 pb-0 h-1/12">
-        <h1 className="text-center font-sans text-primary-blue text-4xl py-5">
+        <h1 className="text-center font-sans text-primary-blue text-4xl md:py-5">
           round {props.currentRound}
         </h1>
         <h3 className="text-2xl px-4 font-sans text-primary-blue">
           theme: {props.theme.toLowerCase()}
         </h3>
       </div>
-      <div className="text-center h-full flex items-center justify-center flex-col">
-        <h1 className="text-center text-8xl md:text-9xl mb-10 py-5 font-sans text-primary-blue">
+      <div className="text-center md:h-2/3 flex items-center justify-center flex-col">
+        <h1 className="text-center text-8xl md:text-9xl md:mb-10 py-5 font-sans text-primary-blue">
           {props.prompt}
         </h1>
         {submittedAnswer ? (
@@ -130,7 +130,7 @@ export default function GameStage(props) {
             onSubmit={handleSubmit}
             className="flex flex-col items-center w-3/4 md:w-5/12 mt-8"
           >
-            <div className="flex flex-col gap-y-5 w-full items-center mb-10">
+            <div className="flex flex-col gap-y-5 w-full items-center mb-6 md:mb-10">
               {promptLetters.map((letter, index) => {
                 return (
                   <div
@@ -161,7 +161,7 @@ export default function GameStage(props) {
             )}
             <button
               type="submit"
-              className="mt-4 px-6 py-2 w-full rounded-md bg-primary-blue text-2xl font-semibold font-sans text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 h-16 tracking-wide"
+              className="md:mt-2 px-6 py-2 w-full rounded-md bg-primary-blue text-2xl font-semibold font-sans text-off-white shadow-xs hover:bg-hover-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 h-16 tracking-wide"
             >
               Submit
             </button>
@@ -170,7 +170,7 @@ export default function GameStage(props) {
       </div>
 
       {/* Fixed bottom section with timer */}
-      <div className="justify-self-end w-full p-6 h-36 bg-off-white">
+      <div className="justify-self-end absolute bottom-0 w-full p-6 h-28 bg-off-white">
         <div className="max-w-md mx-auto flex flex-col items-center">
           <div className="text-6xl font-bold text-primary-blue font-sans">
             {formatTime(props.timeLeft)}
@@ -190,11 +190,7 @@ export default function GameStage(props) {
       />
 
       {/* Add Background Music component */}
-      <BackgroundMusic
-        stage="GAME"
-        enabled={true}
-        volume={0.2}
-      />
+      <BackgroundMusic stage="GAME" enabled={true} volume={0.2} />
     </div>
   );
 }
