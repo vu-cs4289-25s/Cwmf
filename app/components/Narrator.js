@@ -89,7 +89,7 @@ const Narrator = (props) => {
         const submissionRoast = generateRoast(props.submissions);
         return [
           submissionRoast ||
-          "Time to judge these masterpieces... or should I say disasters? 🤖",
+            "Time to judge these masterpieces... or should I say disasters? 🤖",
           "Pick the least embarrassing answer... if you can find one 🎯",
           "Who's the most creative... or the least disappointing? 🤔",
           "Let's see who's the least disappointing... or most disappointing 🏆",
@@ -107,7 +107,7 @@ const Narrator = (props) => {
         const resultsRoast = generateRoast(props.submissions);
         return [
           resultsRoast ||
-          "And the winner is... still not as good as my training data 😏",
+            "And the winner is... still not as good as my training data 😏",
           "Congratulations! You're slightly above average... for a human 🎉",
           "At least you tried... that's what counts, right? 🤷‍♂️",
           "Better luck next time... or maybe not 🍀",
@@ -141,7 +141,9 @@ const Narrator = (props) => {
     }
 
     // Get a random index
-    const randomIndex = Math.floor(Math.random() * commentaryOptionsRef.current.length);
+    const randomIndex = Math.floor(
+      Math.random() * commentaryOptionsRef.current.length
+    );
 
     // Get the message and remove it from options to avoid repetition
     const message = commentaryOptionsRef.current.splice(randomIndex, 1)[0];
@@ -171,9 +173,9 @@ const Narrator = (props) => {
       setStageChanged(false);
 
       // Check user preference for audio from localStorage
-      const audioPreference = localStorage.getItem('useAudioNarrator');
+      const audioPreference = localStorage.getItem("useAudioNarrator");
       if (audioPreference !== null) {
-        setUseAudio(audioPreference === 'true');
+        setUseAudio(audioPreference === "true");
       }
     }
   }, [stageChanged, hasGeneratedMessage, props.submissions, props.stage]);
@@ -201,7 +203,7 @@ const Narrator = (props) => {
   const toggleNarratorMode = () => {
     const newMode = !useAudio;
     setUseAudio(newMode);
-    localStorage.setItem('useAudioNarrator', newMode.toString());
+    localStorage.setItem("useAudioNarrator", newMode.toString());
   };
 
   // If the timer is too low, don't show the narrator
@@ -245,16 +247,45 @@ const Narrator = (props) => {
         <button
           onClick={toggleNarratorMode}
           className="bg-primary-blue text-off-white p-2 rounded-full shadow-lg hover:bg-hover-blue transition-colors"
-          title={useAudio ? "Switch to text narration" : "Switch to audio narration"}
+          title={
+            useAudio ? "Switch to text narration" : "Switch to audio narration"
+          }
         >
           {useAudio ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+              />
             </svg>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"
+              />
             </svg>
           )}
         </button>
