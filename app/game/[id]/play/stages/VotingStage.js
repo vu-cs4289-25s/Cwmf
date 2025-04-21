@@ -188,7 +188,9 @@ export default function VotingStage(props) {
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-blue"></div>
             </div>
           ) : (
-            <div className="flex flex-col mt-3 space-y-5 items-center justify-center pb-32">
+            <div
+              className={`flex flex-col mt-3 space-y-5 items-center justify-center pb-32`}
+            >
               {submissions.length > 0 ? (
                 submissions.map((submission, index) => {
                   const isOwnSubmission =
@@ -202,7 +204,11 @@ export default function VotingStage(props) {
                         submission.id === vote?.id
                           ? "bg-hover-blue"
                           : "bg-off-white"
-                      } w-3/4 rounded-md p-4 transition-colors`}
+                      } w-3/4 rounded-md p-4 transition-colors ${
+                        hasVoted && vote === submission
+                          ? "border-4 border-primary-blue"
+                          : ""
+                      }`}
                     >
                       <p className="text-2xl font-sans text-primary-blue text-center mb-2">
                         {submission.answer}
@@ -253,7 +259,7 @@ export default function VotingStage(props) {
                       </div>
 
                       {/* Voting button (only for others) */}
-                      {!isOwnSubmission && (
+                      {!isOwnSubmission && !hasVoted && (
                         <button
                           onClick={() => setVote(submission)}
                           className="mt-3 w-full rounded-md bg-primary-blue py-2 text-off-white text-xl font-semibold hover:bg-hover-blue transition-colors"
